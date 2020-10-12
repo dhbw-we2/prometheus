@@ -1,86 +1,55 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header
-      class="bg-white text-grey-10"
-      bordered
-    >
-      <q-toolbar class="constrain">
-        <q-btn
-          to="/camera"
-          class="large-screen-only q-mr-sm"
-          icon="eva-camera-outline"
-          size="18px"
-          flat
-          round
-          dense
-        />
-        <q-separator
-          class="large-screen-only"
-          vertical
-          spaced
-        />
-        <q-toolbar-title class="text-grand-hotel text-bold">
-          Quasagram
+  <q-layout view="hHh lpR fFf">
+
+    <q-header elevated class="bg-primary text-white" height-hint="98">
+      <q-toolbar>
+        <q-btn dense flat round icon="menu" @click="left = !left" />
+
+        <q-toolbar-title>
+          <q-avatar>
+            <img src="../assets/racletteicon.png" height="250" width="250"/>
+          </q-avatar>
+          RaclettOrg
         </q-toolbar-title>
-        <q-btn
-          to="/"
-          class="large-screen-only"
-          icon="eva-home-outline"
-          size="18px"
-          flat
-          round
-          dense
-        />
       </q-toolbar>
+
+      <q-tabs align="left">
+        <q-route-tab to="/Start" label="Home" />
+        <q-route-tab to="/Events" label="Events" />
+        <q-route-tab to="/Groups" label="Groups" />
+      </q-tabs>
     </q-header>
 
-    <q-footer
-      class="bg-white small-screen-only"
-      bordered
-    >
-      <q-tabs
-        class="text-grey-10"
-        active-color="primary"
-        indicator-color="transparent"
-      >
-        <q-route-tab
-          to="/"
-          icon="eva-home-outline"
-        />
-        <q-route-tab
-          to="/camera"
-          icon="eva-camera-outline"
-        />
-      </q-tabs>
-    </q-footer>
+    <q-drawer show-if-above v-model="left" side="left" bordered>
+      <!-- drawer content -->
+    </q-drawer>
 
     <q-page-container>
       <router-view />
     </q-page-container>
+
   </q-layout>
 </template>
 
 <script>
 export default {
-  name: 'MainLayout',
-
   data () {
     return {
-      
+      left: false
     }
   }
 }
 </script>
 
 <style lang="sass">
-  .q-toolbar
-    @media (min-width: $breakpoint-sm-min)
-      height: 77px
-  .q-toolbar__title
+.q-toolbar
+  @media (min-width: $breakpoint-sm-min)
+    height: 77px
+.q-toolbar__title
+  font-size: 30px
+  @media (max-width: $breakpoint-xs-max)
+    text-align: center
+.q-footer
+  .q-tab__icon
     font-size: 30px
-    @media (max-width: $breakpoint-xs-max)
-      text-align: center
-  .q-footer
-    .q-tab__icon
-      font-size: 30px
 </style>
