@@ -1,2 +1,2 @@
-# quasagram
-A demo web application using the Quasar framework
+# RaclettOrg
+A web application to plan raclette evenings with friends.
