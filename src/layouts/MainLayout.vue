@@ -10,6 +10,7 @@
             <img src="../assets/racletteicon.png" height="250" width="250"/>
           </q-avatar>
           RaclettOrg
+          <q-btn round color="secondary float-right" to="/Login" icon="login" />
         </q-toolbar-title>
       </q-toolbar>
 
