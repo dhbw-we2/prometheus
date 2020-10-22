@@ -13,7 +13,7 @@
             <q-btn size="lg" color="secondary" class="full-width" label="Login" />
           </q-card-actions>
           <q-card-section class="text-center q-pa-none">
-            <p class="text-grey-6">Not reigistered?
+            <p class="text-grey-6">Not registered?
               <q-btn
                 color="accent"
                 size="btn_size_sq_xs"
