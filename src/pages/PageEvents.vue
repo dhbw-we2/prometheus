@@ -4,7 +4,7 @@
       <div class="row">
         <div class="col col-12 offset-0 col-md-8 offset-md-2">
           <div class="row flex-center justify-start">
-            <div class="col">
+            <div class="col text-white">
               <h4>Kommende Events</h4>
             </div>
             <div class="col">

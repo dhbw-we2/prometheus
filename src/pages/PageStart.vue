@@ -1,14 +1,45 @@
 <template>
-  <q-page class="flex-center">
+  <q-page class="flex-center text-white">
     <div class="q-pa-md  bg-negative">
       <div class="row justify-center" >
         <div class="col col-sm-6 col-xs-12">
           <div  style="text-align: center">
-            <q-img
-              src="../assets/Raclette.jpg"
-              style="width: 70%; margin-top: 15px"
-            >
-            </q-img>
+            <div class="xs">
+              <q-img
+                src="../assets/Raclette.jpg"
+                style="width: 70%; margin-top: 15px"
+              >
+              </q-img>
+            </div>
+            <div class="sm">
+              <q-img
+                src="../assets/Raclette.jpg"
+                style="width: 70%; margin-top: 15px"
+              >
+              </q-img>
+            </div>
+            <div class="md">
+              <q-img
+                src="../assets/Raclette.jpg"
+                style="width: 70%; margin-top: 15px"
+              >
+              </q-img>
+            </div>
+            <div class="lg">
+              <q-img
+                src="../assets/Raclette.jpg"
+                style="width: 60%; margin-top: 15px"
+              >
+              </q-img>
+            </div>
+            <div class="xl">
+              <q-img
+                src="../assets/Raclette.jpg"
+                style="width: 40%; margin-top: 15px"
+              >
+              </q-img>
+            </div>
+
             <br>
             <q-btn
               rounded
@@ -46,12 +77,83 @@
         </div>
       </div>
     </div>
-    <div class="row bg-primary">
-      <div class="col-6 col-sm-6 col-xs-12">
-        Text hello
+    <div class="row bg-primary col-md-12 xs">
+      <div class="col-xs-12">
+        <q-parallax :height="300" :speed="0.5" style="text-align: right">
+          <template v-slot:media>
+            <img src="../assets/friends.jpeg">
+          </template>
+
+          <h1 class="text-white">Connect</h1>
+        </q-parallax>
       </div>
-      <div class="col-6 col-sm-6 col-xs-12 offset-md-6">
-        <q-parallax :height="300" :speed="0.3" style="text-align: right">
+      <div class="col-xs-12">
+        <div style="margin: 15px;">
+          Text for Mobile
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </div>
+      </div>
+    </div>
+    <div class="row bg-primary col-md-12 sm">
+      <div class="col-sm-12">
+        <q-parallax :height="300" :speed="0.5" style="text-align: right">
+          <template v-slot:media>
+            <img src="../assets/friends.jpeg">
+          </template>
+
+          <h1 class="text-white">Connect</h1>
+        </q-parallax>
+      </div>
+      <div class="col-sm-12">
+        <div style="margin: 15px;">
+          Text for Mobile
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </div>
+      </div>
+    </div>
+    <div class="row bg-primary col-md-12 md">
+      <div class="col-6 col-md-6">
+        <div style="margin: 15px;">
+          Text for desktop
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </div>
+      </div>
+      <div class="col-6 col-sm-6 col-xs-12">
+        <q-parallax :height="300" :speed="0.5" style="text-align: right">
+          <template v-slot:media>
+            <img src="../assets/friends.jpeg">
+          </template>
+
+          <h1 class="text-white">Connect</h1>
+        </q-parallax>
+      </div>
+    </div>
+    <div class="row bg-primary col-md-12 lg">
+      <div class="col-6 col-md-6">
+        <div style="margin: 15px;">
+          Text for desktop
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </div>
+      </div>
+      <div class="col-6 col-sm-6 col-xs-12">
+        <q-parallax :height="300" :speed="0.5" style="text-align: right">
+          <template v-slot:media>
+            <img src="../assets/friends.jpeg">
+          </template>
+
+          <h1 class="text-white">Connect</h1>
+        </q-parallax>
+      </div>
+    </div>
+    <div class="row bg-primary col-md-12 xl">
+      <div class="col-6 col-md-6">
+        <div style="margin: 15px;">
+          Text for desktop
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </div>
+      </div>
+      <div class="col-6 col-sm-6 col-xs-12">
+        <q-parallax :height="300" :speed="0.5" style="text-align: right">
           <template v-slot:media>
             <img src="../assets/friends.jpeg">
           </template>
@@ -70,14 +172,54 @@
           <h1 class="text-white">Organize</h1>
         </q-parallax>
       </div>
-      <div class="col col-sm-6 col-xs-12 offset-md-6">
-
+      <div class="col-6 col-sm-6 col-xs-12">
+        <div style="margin: 15px;">
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </div>
       </div>
     </div>
-    <div class="row bg-primary">
-      <div class="col col-sm-6 col-xs-12">
+    <div class="row bg-primary xs">
+      <div class="col-xs-12">
+        <q-parallax :height="300" :speed="0.5">
+          <template v-slot:media>
+            <img src="../assets/raclette_nice.jpg">
+          </template>
+
+          <h1 class="text-white">Enjoy</h1>
+        </q-parallax>
       </div>
-      <div class="col col-sm-6 col-xs-12 offset-md-6">
+      <div class="col-xs-12">
+        <div style="margin: 15px;">
+          Text for Mobile
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </div>
+      </div>
+    </div>
+    <div class="row bg-primary sm">
+      <div class="col-sm-12">
+        <q-parallax :height="300" :speed="0.5">
+          <template v-slot:media>
+            <img src="../assets/raclette_nice.jpg">
+          </template>
+
+          <h1 class="text-white">Enjoy</h1>
+        </q-parallax>
+      </div>
+      <div class="col-sm-12">
+        <div style="margin: 15px;">
+          Text for Mobile
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </div>
+      </div>
+    </div>
+    <div class="row bg-primary md">
+      <div class="col-6">
+        <div style="margin: 15px;">
+          Text for desktop
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </div>
+      </div>
+      <div class="col-6">
         <q-parallax :height="300" :speed="0.5">
           <template v-slot:media>
             <img src="../assets/raclette_nice.jpg">
@@ -87,6 +229,45 @@
         </q-parallax>
       </div>
     </div>
+    <div class="row bg-primary lg">
+      <div class="col-6">
+        <div style="margin: 15px;">
+          Text for desktop
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </div>
+      </div>
+      <div class="col-6">
+        <q-parallax :height="300" :speed="0.5">
+          <template v-slot:media>
+            <img src="../assets/raclette_nice.jpg">
+          </template>
+
+          <h1 class="text-white">Enjoy</h1>
+        </q-parallax>
+      </div>
+    </div>
+    <div class="row bg-primary xl">
+      <div class="col-6">
+        <div style="margin: 15px;">
+          Text for desktop
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </div>
+      </div>
+      <div class="col-6">
+        <q-parallax :height="300" :speed="0.5">
+          <template v-slot:media>
+            <img src="../assets/raclette_nice.jpg">
+          </template>
+
+          <h1 class="text-white">Enjoy</h1>
+        </q-parallax>
+      </div>
+    </div>
+
+    <div class="row xl bg-negative" style="height: 250px">
+
+    </div>
+
   </q-page>
 </template>
 

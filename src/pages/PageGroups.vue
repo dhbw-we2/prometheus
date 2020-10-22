@@ -1,10 +1,10 @@
 <template>
-  <q-page class="flex-center bg-negative" padding>
+  <q-page class="flex-center bg-negative " padding>
     <div class="q-pa-md">
       <div class="row">
         <div class="col col-12 offset-0 col-md-8 offset-md-2">
           <div class="row flex-center justify-start">
-            <div class="col">
+            <div class="col text-white">
               <h4>Meine Gruppen</h4>
             </div>
             <div class="col">
