@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex-center bg-negative">
+  <q-page class="flex-center bg-negative text-white">
     <div class="row justify-center lt-md">
       <div  class="text-white col-12">
         <q-parallax :height="300"
