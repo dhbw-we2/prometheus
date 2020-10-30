@@ -1,63 +1,41 @@
 <template>
-  <q-page class="flex-center text-white">
+  <q-page class="flex-center bg-negative">
+    <div class="row justify-center lt-md">
+      <div  class="text-white col-12">
+        <q-parallax :height="300"
+                    src="../assets/Raclette.jpg"
+                    style="width: 100%;"
+        >
+          <h3 class="text-white">RaclettOrg</h3>
+          <q-btn
+            rounded
+            color="info"
+            size="25px"
+            label="Get Started"
+          />
+        </q-parallax>
+      </div>
+    </div>
+    <div class="row justify-center gt-md">
+      <div  class="text-white col-12">
+        <q-parallax :height="800"
+          src="../assets/Raclette.jpg"
+          style="width: 100%;"
+        >
+          <h1 class="text-white">RaclettOrg</h1>
+          <q-btn
+            rounded
+            color="info"
+            size="30px"
+            label="Get Started"
+          />
+        </q-parallax>
+      </div>
+    </div>
     <div class="q-pa-md  bg-negative">
       <div class="row justify-center" >
-        <div class="col col-sm-6 col-xs-12">
-          <div  style="text-align: center">
-            <div class="xs">
-              <q-img
-                src="../assets/Raclette.jpg"
-                style="width: 70%; margin-top: 15px"
-              >
-              </q-img>
-            </div>
-            <div class="sm">
-              <q-img
-                src="../assets/Raclette.jpg"
-                style="width: 70%; margin-top: 15px"
-              >
-              </q-img>
-            </div>
-            <div class="md">
-              <q-img
-                src="../assets/Raclette.jpg"
-                style="width: 70%; margin-top: 15px"
-              >
-              </q-img>
-            </div>
-            <div class="lg">
-              <q-img
-                src="../assets/Raclette.jpg"
-                style="width: 60%; margin-top: 15px"
-              >
-              </q-img>
-            </div>
-            <div class="xl">
-              <q-img
-                src="../assets/Raclette.jpg"
-                style="width: 40%; margin-top: 15px"
-              >
-              </q-img>
-            </div>
 
-            <br>
-            <q-btn
-              rounded
-              color="info"
-              size="30px"
-              label="Get Started"
-              style="margin-top: 20px"
-            />
-          </div>
-
-        </div>
         <div class="col col-auto" style="margin: auto; text-align: center">
-          <h3>
-            <q-avatar>
-              <img src="../assets/racletteicon.png" height="250" width="250"/>
-            </q-avatar>
-            RaclettOrg
-          </h3>
           <h5>Easy Organizer for Raclette Evenings with your Friends</h5>
           <div>
             <q-chip size="lg" icon="bookmark">
@@ -77,7 +55,10 @@
         </div>
       </div>
     </div>
-    <div class="row bg-primary col-md-12 lt-md">
+
+    <q-separator />
+
+    <div class="row col-md-12 lt-md bg-primary">
       <div class="col-12">
         <q-parallax :height="300" :speed="0.5" style="text-align: right">
           <template v-slot:media>
@@ -95,7 +76,7 @@
       </div>
     </div>
 
-    <div class="row bg-primary col-md-12 gt-md">
+    <div class="row col-md-12 gt-md bg-primary">
       <div class="col-6 col-md-6">
         <div style="margin: 15px;">
           Text for desktop
@@ -112,7 +93,8 @@
         </q-parallax>
       </div>
     </div>
-    <div class="row bg-negative">
+    <q-separator />
+    <div class="row">
       <div class="col-6 col-sm-6 col-xs-12">
         <q-parallax :height="300" :speed="0.5">
           <template v-slot:media>
@@ -128,7 +110,8 @@
         </div>
       </div>
     </div>
-    <div class="row bg-primary lt-md">
+    <q-separator />
+    <div class="row lt-md bg-primary">
       <div class="col-12">
         <q-parallax :height="300" :speed="0.5">
           <template v-slot:media>
@@ -146,7 +129,7 @@
       </div>
     </div>
 
-    <div class="row bg-primary gt-md">
+    <div class="row gt-md bg-primary">
       <div class="col-6">
         <div style="margin: 15px;">
           Text for desktop
@@ -163,8 +146,8 @@
         </q-parallax>
       </div>
     </div>
-
-    <div class="row xl bg-negative" style="height: 250px">
+    <q-separator />
+    <div class="row xl" style="height: 250px">
 
     </div>
 

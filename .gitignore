@@ -2,6 +2,9 @@
 .thumbs.db
 node_modules
 
+# Firebase Keys
+/backend/serviceAccountKey.json
+
 # Quasar core related directories
 .quasar
 /dist
