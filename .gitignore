@@ -35,3 +35,4 @@ yarn-error.log*
 *.njsproj
 *.sln
 .quasar.env.json
+.quasar.env.json
