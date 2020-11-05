@@ -8,8 +8,16 @@ const routes = [
       { path: '/Start', component: () => import('pages/PageStart.vue')},
       { path: '/Events', component: () => import('pages/PageEvents.vue')},
       { path: '/Groups', component: () => import('pages/PageGroups.vue')},
-      { path: '/Login', component: () => import('pages/PageLogin.vue')},
-      { path: '/Register', component: () => import('pages/PageRegister.vue')}
+    ]
+  },
+  {
+    path: '/auth',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      {path: 'login', name: 'Login', component: () => import('pages/Auth')},
+      {path: 'register', name: 'Register', component: () => import('pages/Auth')},
+      {path: 'forgotPassword', name: 'ForgotPassword', component: () => import('pages/ForgotPassword.vue')
+      },
     ]
   }
 ]

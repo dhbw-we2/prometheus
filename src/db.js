@@ -1,4 +1,4 @@
-import firebase from 'firebase/app'
+/*import firebase from 'firebase/app'
 import 'firebase/firestore'
 
 
@@ -16,4 +16,4 @@ const db = firebase.initializeApp(firebaseConfig).firestore()
 export default db
 
 const { TimeStamp, GeoPoint } = firebase.firestore
-export { TimeStamp, GeoPoint }
+export { TimeStamp, GeoPoint }*/

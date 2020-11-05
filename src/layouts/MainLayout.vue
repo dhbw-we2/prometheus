@@ -10,14 +10,14 @@
             <img src="../assets/racletteicon.png" height="250" width="250"/>
           </q-avatar>
           RaclettOrg
-          <q-btn round color="secondary float-right" to="/Login" icon="login" />
+          <q-btn round color="secondary float-right" to="/auth/login" icon="login" v-if="!$store.state.auth.isAuthenticated"/>
+          <q-btn round color="secondary float-right" @click="logout" icon="logout" v-if="$store.state.auth.isAuthenticated" />
         </q-toolbar-title>
       </q-toolbar>
 
-      <q-tabs align="left">
-        <q-route-tab to="/Start" label="Home" />
-        <q-route-tab to="/Events" label="Events" />
-        <q-route-tab to="/Groups" label="Groups" />
+      <q-tabs align="left" v-if="$store.state.auth.isAuthenticated">
+        <q-route-tab to="/Events" label="Events"/>
+        <q-route-tab to="/Groups" label="Groups"/>
       </q-tabs>
     </q-header>
 
@@ -33,12 +33,32 @@
 </template>
 
 <script>
+import {mapActions} from "vuex";
+
 export default {
   data () {
     return {
       left: false
     }
+  },
+  methods: {
+    ...mapActions('auth', ['logoutUser']),
+    async logout() {
+      try {
+        await this.logoutUser()
+        this.$q.notify({
+          type: 'info',
+          message: "You are now logged out!"
+        })
+      } catch (err) {
+        this.$q.notify({
+          type: 'negative',
+          message: `${err}`,
+        })
+      }
+    }
   }
+
 }
 </script>
 
