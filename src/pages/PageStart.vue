@@ -2,7 +2,7 @@
   <q-page class="flex-center bg-negative text-white">
     <div class="row justify-center lt-md">
       <div  class="text-white col-12">
-        <q-parallax :height="300"
+        <q-parallax :height="400"
                     src="../assets/Raclette.jpg"
                     style="width: 100%;"
         >
@@ -16,7 +16,7 @@
         </q-parallax>
       </div>
     </div>
-    <div class="row justify-center gt-md">
+    <div class="row justify-center gt-sm">
       <div  class="text-white col-12">
         <q-parallax :height="800"
           src="../assets/Raclette.jpg"
@@ -76,7 +76,7 @@
       </div>
     </div>
 
-    <div class="row col-md-12 gt-md bg-primary">
+    <div class="row col-md-12 gt-sm bg-primary">
       <div class="col-6 col-md-6">
         <div style="margin: 15px;">
           Text for desktop
@@ -93,9 +93,11 @@
         </q-parallax>
       </div>
     </div>
+
     <q-separator />
-    <div class="row">
-      <div class="col-6 col-sm-6 col-xs-12">
+
+    <div class="row lt-md">
+      <div class="col-12">
         <q-parallax :height="300" :speed="0.5">
           <template v-slot:media>
             <img src="../assets/organize.jpg">
@@ -104,13 +106,31 @@
           <h1 class="text-white">Organize</h1>
         </q-parallax>
       </div>
-      <div class="col-6 col-sm-6 col-xs-12">
+      <div class="col-12">
         <div style="margin: 15px;">
           Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
         </div>
       </div>
     </div>
+    <div class="row gt-sm">
+      <div class="col-6">
+        <q-parallax :height="300" :speed="0.5">
+          <template v-slot:media>
+            <img src="../assets/organize.jpg">
+          </template>
+
+          <h1 class="text-white">Organize</h1>
+        </q-parallax>
+      </div>
+      <div class="col-6">
+        <div style="margin: 15px;">
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </div>
+      </div>
+    </div>
+
     <q-separator />
+
     <div class="row lt-md bg-primary">
       <div class="col-12">
         <q-parallax :height="300" :speed="0.5">
@@ -129,7 +149,7 @@
       </div>
     </div>
 
-    <div class="row gt-md bg-primary">
+    <div class="row gt-sm bg-primary">
       <div class="col-6">
         <div style="margin: 15px;">
           Text for desktop
@@ -156,7 +176,7 @@
 
 <script>
 export default {
-name: "page1"
+name: "PageStart"
 
 }
 </script>
