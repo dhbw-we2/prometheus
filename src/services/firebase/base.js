@@ -13,6 +13,15 @@ export const firestore = () => {
 }
 
 /**
+ * Returns Firebase 's global namespace from which all Firebase services are accessed
+ * https://firebase.google.com/docs/reference/js/firebase.auth.html#callable
+ * @return {Object} Firebase Module
+ */
+export const self = () => {
+  return firebase
+}
+
+/**
  * Firebase's auth interface method
  * https: //firebase.google.com/docs/reference/js/firebase.auth.html#callable
  * @return {Object} currentUser object from firebase
@@ -58,8 +67,14 @@ export const handleOnAuthStateChanged = async (store, currentUser) => {
   // Save to the store
   store.commit('auth/setAuthState', {
     isAuthenticated: currentUser !== null,
-    isReady: true
+    isReady: true,
+    uid: (currentUser ? currentUser.uid : '')
   })
+
+  // Get & bind the current user
+  if (store.state.auth.isAuthenticated) {
+    await store.dispatch('user/getCurrentUser', currentUser.uid)
+  }
 
   // If the user loses authentication route
   // them to the login page

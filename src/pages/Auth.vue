@@ -113,10 +113,12 @@ export default {
             try {
               if (this.isRegistration) {
                 await this.createNewUser({ email, password })
+                this.$router.push({ path: '/user/profile' })
               } else {
                 await this.loginUser({ email, password })
+                this.$router.push({ path: '/home' })
               }
-              this.$router.push({ path: '/events' })
+
             } catch (err) {
               console.error(err)
               this.$q.notify({

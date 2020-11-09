@@ -79,9 +79,10 @@
 
 <script>
 import { date } from 'quasar'
-
+import { mapActions } from 'vuex'
+import { QSpinnerGears } from 'quasar'
 export default {
-  name: 'PageHome',
+  name: 'PageGroups',
   data () {
     return {
       groups: [
@@ -157,6 +158,12 @@ export default {
   filters:{
     dateToString(timestamp){
       return date.formatDate(timestamp, "DD.MM.YYYY HH:mm") + " Uhr"
+    }
+  },
+  methods: {
+    updateQuerry()
+    {
+      let query = this.$firestore.collection("posts").orderBy("date", "desc")
     }
   }
 }

@@ -1,8 +1,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import { vuexfireMutations } from 'vuexfire'
 
 // we first import the module
 import auth from './auth'
+import user from './user'
 
 Vue.use(Vuex)
 
@@ -15,11 +17,15 @@ Vue.use(Vuex)
  * with the Store instance.
  */
 
-let store = null
+let store
 export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
-      auth
+      auth,
+      user
+    },
+    mutations: {
+      ...vuexfireMutations
     },
 
     // enable strict mode (adds overhead!)
