@@ -19,7 +19,7 @@
                 <q-card-section>
                   <div class="row items-center no-wrap">
                     <div class="col">
-                      <div class="text-h5">{{ group.name }}</div>
+                      <div class="text-h5">{{ group.Name }}</div>
                     </div>
                     <div class="col-auto">
                       <q-btn color="grey-7" round flat icon="more_vert">
@@ -43,13 +43,13 @@
                       <div class="text-h6 q-pa-sm">Teilnehmer:</div>
                       <q-list bordered separator>
                         <q-item clickable v-ripple
-                        v-for="user in group.users">
+                        v-for="user in group.Users">
                           <q-item-section avatar>
                             <q-avatar>
-                              <img src="https://cdn.quasar.dev/img/boy-avatar.png">
+                              <img :src="user.profilePhoto">
                             </q-avatar>
                           </q-item-section>
-                          <q-item-section>{{user.username}}</q-item-section>
+                          <q-item-section>{{user.fullName}}</q-item-section>
                         </q-item>
                       </q-list>
                     </div>
@@ -59,8 +59,8 @@
                         <q-item clickable v-ripple
                         v-for="event in group.events">
                           <q-item-section>
-                            <q-item-label>{{ event.name }}</q-item-label>
-                            <q-item-label caption>{{ event.datetime | dateToString }}</q-item-label>
+                            <q-item-label>{{ event.Name }}</q-item-label>
+                            <q-item-label caption>{{ event.DateTime | dateToString }}</q-item-label>
                           </q-item-section>
                         </q-item>
                       </q-list>
@@ -86,85 +86,62 @@ export default {
   data () {
     return {
       groups: [
-        {
-          id: 1,
-          name: "Testgruppe",
-          created: 1602674046530,
-          users: [
-            {
-              id: 1,
-              username: "DeFix"
-            },
-            {
-              id: 2,
-              username: "DeEinecker"
-            },
-            {
-              id: 3,
-              username: "DeBühler"
-            }
-          ],
-          events: [
-            {
-              id: 1,
-              datetime: 1602674046530,
-              name: "Testevent"
-            },
-            {
-              id: 1,
-              datetime: 1602677000000,
-              name: "Essen bei Toni im Keller"
-            }
-          ]
-        },
-        {
-          id: 2,
-          name: "Die andere kuhle Gruppe",
-          created: 1602674046530,
-          users: [
-            {
-              id: 1,
-              username: "DeFix"
-            },
-            {
-              id: 2,
-              username: "DeEinecker"
-            },
-            {
-              id: 3,
-              username: "DeBühler"
-            },
-            {
-              id: 4,
-              username: "DeZipfel"
-            }
-          ],
-          events: [
-            {
-              id: 1,
-              datetime: 1602674046530,
-              name: "Testevent"
-            },
-            {
-              id: 1,
-              datetime: 1602677000000,
-              name: "Essen bei Toni im Keller"
-            }
-          ]
-        }
       ]
     }
   },
   filters:{
     dateToString(timestamp){
-      return date.formatDate(timestamp, "DD.MM.YYYY HH:mm") + " Uhr"
+      let timestampInMs = timestamp.seconds * 1000
+      return date.formatDate(timestampInMs, "DD.MM.YYYY HH:mm") + " Uhr"
     }
   },
-  methods: {
-    updateQuerry()
-    {
-      let query = this.$firestore.collection("posts").orderBy("date", "desc")
+  methods:{
+    async getGroupsData() {
+      let userId = this.$fb.auth().currentUser.uid;
+      let groups = await this.getGroupsOfUser(userId);
+
+      // get all events promises for each group
+      let firebaseData = []
+      groups.forEach(doc => {
+       // console.log(doc.data())
+        let groupWithEvents = doc.data()
+        groupWithEvents.events = this.getEventsByGroupId(doc.id)
+        firebaseData.push(groupWithEvents)
+      })
+
+      // await the event promises and save results in the proper groups
+      for (let test in firebaseData){
+        let events = await firebaseData[test].events
+        firebaseData[test].events = []
+        events.forEach(eve => {
+          firebaseData[test].events.push(eve.data())
+        })
+
+        let userRefs = firebaseData[test].Users
+        firebaseData[test].Users = []
+        for (let userRef of userRefs) {
+          console.log(userRef)
+          let user = await this.$firestore.collection("users").doc(userRef.id).get()
+          firebaseData[test].Users.push(user.data())
+        }
+      }
+
+      console.log(firebaseData)
+      this.groups = firebaseData
+    },
+    getGroupsOfUser(userId){
+      let userRef = this.$firestore.collection("users").doc(userId);
+      let groups = this.$firestore.collection("Groups").where("Users", "array-contains", userRef).get();
+      return groups;
+    },
+    getEventsByGroupId(groupId){
+      let groupRef = this.$firestore.collection("Groups").doc(groupId);
+      let groupEvents = this.$firestore.collection("Events").where("Group", "==", groupRef).get();
+      return groupEvents;
     }
+  },
+  async created() {
+    await this.getGroupsData();
   }
 }
 </script>
