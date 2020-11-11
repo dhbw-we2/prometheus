@@ -13,6 +13,7 @@ export default ({ store, Vue }) => {
   })
 
   Vue.prototype.$fb = firebaseService
+  Vue.prototype.$firestore = firebaseService.firestore()
   store.$fb = firebaseService
 }
 
