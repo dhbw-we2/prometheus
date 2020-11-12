@@ -8,7 +8,29 @@
               <h4>Kommende Events</h4>
             </div>
             <div class="col">
-              <q-btn color="positive" class="float-right" icon="add" label="Neues Event erstellen"/>
+              <q-btn color="positive" class="float-right" icon="add" label="Neues Event erstellen" @click="prompt = true"/>
+
+              <q-dialog v-model="prompt" persistent>
+                <q-card style="min-width: 350px">
+                  <q-card-section>
+                    <div class="text-h6">Neues Event</div>
+                  </q-card-section>
+
+                  <q-card-section class="q-pt-none">
+                    <q-input label="Benenne dein Event" v-model="newEventName" autofocus />
+                    <q-input label="Wo findet es statt?" v-model="newEventLocation" />
+                    <q-select label="Für welche Gruppe?" v-model="newEventGroup" :options="groups"/>
+                    <q-input type="date" v-model="newEventDate" />
+                    <q-input type="time" v-model="newEventTime" />
+                  </q-card-section>
+
+                  <q-card-actions align="right" class="text-primary">
+                    <q-btn color="negative" flat label="Abbrechen" v-close-popup />
+                    <q-btn color="positive" flat label="Erstellen" @click="createNewEvent"/>
+                  </q-card-actions>
+                </q-card>
+              </q-dialog>
+
             </div>
           </div>
           <div class="row"
@@ -18,7 +40,7 @@
                 <q-card-section>
                   <div class="row items-center no-wrap">
                     <div class="col">
-                      <div class="text-h5">{{ event.Description }}</div>
+                      <div class="text-h5">{{ event.Name }}</div>
                       <div class="text-subtitle2 q-pa-sm">erstellt von: {{ event.Creator }}</div>
                     </div>
                     <div class="col-auto">
@@ -56,7 +78,7 @@
 
                       <q-item-section>
                         <q-item-label>Wann</q-item-label>
-                        <q-item-label caption>{{ event.Timestamp }}</q-item-label>
+                        <q-item-label caption>{{ event.DateTime | dateToString }}</q-item-label>
                       </q-item-section>
                     </q-item>
                   </q-list>
@@ -103,6 +125,7 @@
               </q-card>
             </div>
             <br>
+            </br>
           </div>
         </div>
       </div>
@@ -111,59 +134,111 @@
 </template>
 
 <script>
+import {date} from "quasar";
+
 export default {
   name: 'PageEvents',
   data () {
     return {
       events: [
-      ]
+      ],
+      groups:[
+      ],
+      prompt: false,
+      newEventName: '',
+      newEventLocation: '',
+      newEventDate:'',
+      newEventTime: '',
+      newEventGroup:''
+    }
+  },
+  filters:{
+    dateToString(timestamp){
+      let timestampInMs = timestamp.seconds * 1000
+      return date.formatDate(timestampInMs, "DD.MM.YYYY HH:mm") + " Uhr"
     }
   },
   methods:{
     async getGroupsData()
     {
+      // Get User and his groups
       let userId = this.$fb.auth().currentUser.uid;
-      let groups = await this.getGroupsByUserId(userId);
+      let allGroups = await this.getAllGroupsOfUser(userId);
 
-      // get all events promises for each group
-      let firebaseGroups = []
-      groups.forEach(doc => {
-        // console.log(doc.data())
-        let groupWithEvents = doc.data()
-        groupWithEvents.events = this.getEventsByGroupId(doc.id)
-        firebaseGroups.push(groupWithEvents)
-      })
-
-      // await the event promises and save all event Data
-      let firebaseEvents = []
-      for (let groupIndex in firebaseGroups){
-        let events = await firebaseGroups[groupIndex].events
-        events.forEach(event => {
-          firebaseEvents.push(event.data())
-        })
+      // Get all events of all groups of the user
+      let allEvents = []
+      for (let group of allGroups)
+      {
+        let events = await this.getAllEventsOfGroup(group.id)
+        for (let event of events){
+          allEvents.push(event.data());
+        }
       }
-      for (let eventIndex in firebaseEvents){
-        let items = firebaseEvents[eventIndex].Items
+
+      // Fill all items with data
+      for (let event of allEvents)
+      {
+        let items = event.Items
         for (let itemIndex in items)
         {
           items[itemIndex] = await this.getItemByItemId(items[itemIndex].id)
           items[itemIndex].Creator = await this.getUserByUserId(items[itemIndex].Creator.id)
           items[itemIndex].Shopper = await this.getUserByUserId(items[itemIndex].Shopper.id)
         }
+
+        if (event.Creator){
+          let creator = await this.getUserByUserId(event.Creator.id)
+          if(creator){
+            event.Creator = creator.fullName
+          }else{
+            event.Creator = ""
+          }
+        }
       }
-      console.log(firebaseEvents)
-      this.events = firebaseEvents
+
+      for (let group of allGroups)
+      {
+        this.groups.push(group.data().Name)
+      }
+
+      this.events = allEvents
     },
-    getGroupsByUserId(userId){
+
+    async getAllGroupsOfUser(userId){
+      let data = [];
       let userRef = this.$firestore.collection("users").doc(userId);
-      let groups = this.$firestore.collection("Groups").where("Users", "array-contains", userRef).get();
-      return groups;
+      await this.$firestore.collection("Groups").where("Users", "array-contains", userRef).get().then(function(querySnapshot){
+        querySnapshot.forEach(function(doc) {
+          // doc.data() is never undefined for query doc snapshots
+          //console.log("Doc: ", doc, " Doc.id(): ", doc.id, " Doc.data(): ", doc.data());
+          data.push(doc);
+        });});
+      return data;
     },
-    getEventsByGroupId(groupId){
+
+    async getAllEventsOfGroup(groupId){
+      let data = [];
       let groupRef = this.$firestore.collection("Groups").doc(groupId);
-      let groupEvents = this.$firestore.collection("Events").where("Group", "==", groupRef).get();
-      return groupEvents;
+      await this.$firestore.collection("Events").where("Group", "==", groupRef).get().then(function(querySnapshot){
+        querySnapshot.forEach(function(doc) {
+          // doc.data() is never undefined for query doc snapshots
+          //console.log("Doc: ", doc, " Doc.id(): ", doc.id, " Doc.data(): ", doc.data());
+          data.push(doc);
+        });});
+      return data;
     },
+
+    async getGroupByName(groupName){
+      let data = [];
+      await this.$firestore.collection("Groups").where("Name", "==", groupName).get().then(function(querySnapshot){
+        querySnapshot.forEach(function(doc) {
+          // doc.data() is never undefined for query doc snapshots
+          //console.log("Doc: ", doc, " Doc.id(): ", doc.id, " Doc.data(): ", doc.data());
+          data.push(doc);
+        });});
+      return data;
+    },
+
     async getItemByItemId(itemId){
       let docRef = this.$firestore.collection("Items").doc(itemId);
       var returnValue
@@ -176,8 +251,9 @@ export default {
       });
       return returnValue;
     },
+
     async getUserByUserId(userId){
-      let docRef = this.$firestore.collection("user").doc(userId);
+      let docRef = this.$firestore.collection("users").doc(userId);
       var returnValue
       await docRef.get().then(function(doc) {
         if (doc.exists) {
@@ -187,6 +263,38 @@ export default {
         console.log("Error getting user:", error);
       });
       return returnValue;
+    },
+
+    async createNewEvent(){
+       try {
+        let dateTime = new Date(this.newEventDate + "T" + this.newEventTime);
+        let userID = this.$fb.auth().currentUser.uid;
+        if(userID == ""){ throw "Empty User ID"}
+        let userRef = this.$firestore.collection("users").doc(userID);
+        let groups = await this.getGroupByName(this.newEventGroup);
+        let groupId = groups[0].id;
+        let groupRef = this.$firestore.collection("Groups").doc(groupId);
+        if(this.newEventName == ""){ throw "Empty Event Name"};
+        if(this.newEventLocation == ""){ throw "Empty Location"};
+        this.$firestore.collection("Events").add({
+          Name: this.newEventName,
+          Location: this.newEventLocation,
+          DateTime: dateTime,
+          Creator: userRef,
+          Group: groupRef
+        })
+      }catch (error){
+        console.log(error);
+        alert("Bitte fülle alle Felder aus.")
+        return;
+      }
+      // Close popup if event created successfully
+      this.prompt = false;
+      this.newEventGroup = ''
+      this.newEventDate = ''
+      this.newEventTime = ''
+      this.newEventLocation = ''
+      this.newEventName = ''
     }
   },
   async created() {
