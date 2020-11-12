@@ -8,7 +8,23 @@
               <h4>Meine Gruppen</h4>
             </div>
             <div class="col">
-              <q-btn color="positive" class="float-right" icon="add" label="Neue Gruppe erstellen"/>
+              <q-btn color="positive" class="float-right" icon="add" label="Neue Gruppe erstellen" @click="prompt = true"/>
+              <q-dialog v-model="prompt" persistent>
+                <q-card style="min-width: 350px">
+                  <q-card-section>
+                    <div class="text-h6">Neue Gruppe erstellen</div>
+                  </q-card-section>
+
+                  <q-card-section class="q-pt-none">
+                    <q-input label="Gib deiner Gruppe einen Namen" v-model="newGroupName" autofocus  />
+                  </q-card-section>
+
+                  <q-card-actions align="right" class="text-primary">
+                    <q-btn flat label="Abbrechen" v-close-popup />
+                    <q-btn flat color="positive" label="Erstellen" @click="createNewGroup" />
+                  </q-card-actions>
+                </q-card>
+              </q-dialog>
             </div>
           </div>
           <div class="row"
@@ -28,7 +44,7 @@
                             <q-item clickable>
                               <q-item-section>Gruppe verlassen</q-item-section>
                             </q-item>
-                            <q-item clickable>
+                            <q-item v-if="isAdminUser(group.Admins)" clickable>
                               <q-item-section>Freund hinzufügen</q-item-section>
                             </q-item>
                           </q-list>
@@ -49,7 +65,20 @@
                               <img :src="user.profilePhoto">
                             </q-avatar>
                           </q-item-section>
-                          <q-item-section>{{user.fullName}}</q-item-section>
+                          <q-item-section>
+                            <q-item-label>{{user.fullName}}</q-item-label>
+                            <q-item-label v-if="isAdminUser(group.Admins, user.id)" caption lines="1">Admin</q-item-label>
+                            <q-menu v-if="isAdminUser(group.Admins)" touch-position>
+                              <q-list>
+                                <q-item v-if="!isAdminUser(group.Admins, user.id)" clickable v-close-popup>
+                                  <q-item-section>Zu Admin befördern</q-item-section>
+                                </q-item>
+                                <q-item clickable v-close-popup>
+                                  <q-item-section color="primary">Aus der Gruppe entfernen</q-item-section>
+                                </q-item>
+                              </q-list>
+                            </q-menu>
+                          </q-item-section>
                         </q-item>
                       </q-list>
                     </div>
@@ -86,7 +115,9 @@ export default {
   data () {
     return {
       groups: [
-      ]
+      ],
+      prompt: false,
+      newGroupName: ""
     }
   },
   filters:{
@@ -97,47 +128,109 @@ export default {
   },
   methods:{
     async getGroupsData() {
+      // get user and his groups
       let userId = this.$fb.auth().currentUser.uid;
-      let groups = await this.getGroupsOfUser(userId);
+      let allGroupRefs = await this.getGroupsOfUser(userId);
 
-      // get all events promises for each group
-      let firebaseData = []
-      groups.forEach(doc => {
-       // console.log(doc.data())
-        let groupWithEvents = doc.data()
-        groupWithEvents.events = this.getEventsByGroupId(doc.id)
-        firebaseData.push(groupWithEvents)
-      })
+      // get all data related to the group
+      let viewData = []
+      for (let groupRef of allGroupRefs)
+      {
+        // get group-data
+        let group = groupRef.data()
 
-      // await the event promises and save results in the proper groups
-      for (let test in firebaseData){
-        let events = await firebaseData[test].events
-        firebaseData[test].events = []
-        events.forEach(eve => {
-          firebaseData[test].events.push(eve.data())
-        })
-
-        let userRefs = firebaseData[test].Users
-        firebaseData[test].Users = []
-        for (let userRef of userRefs) {
-          console.log(userRef)
-          let user = await this.$firestore.collection("users").doc(userRef.id).get()
-          firebaseData[test].Users.push(user.data())
+        //get event-data
+        let events = await this.getAllEventsOfGroup(groupRef.id)
+        group.events = []
+        for (let event of events){
+          group.events.push(event.data())
         }
+
+        //get user-data
+        let usersData = []
+        for (let userRef of group.Users){
+          let user = await this.getUserByUserId(userRef.id)
+          usersData.push(user)
+        }
+        group.Users = usersData
+
+        //get admins-data
+        let adminData = []
+        for (let adminRef of group.Admins){
+          let admin = await this.getUserByUserId(adminRef.id)
+          adminData.push(admin)
+        }
+        group.Admins = adminData
+
+        viewData.push(group)
       }
 
-      console.log(firebaseData)
-      this.groups = firebaseData
+      this.groups = viewData
     },
-    getGroupsOfUser(userId){
+    async getGroupsOfUser(userId) {
+      let data = [];
       let userRef = this.$firestore.collection("users").doc(userId);
-      let groups = this.$firestore.collection("Groups").where("Users", "array-contains", userRef).get();
-      return groups;
+      await this.$firestore.collection("Groups").where("Users", "array-contains", userRef).get().then(function (querySnapshot) {
+        querySnapshot.forEach(function (doc) {
+          data.push(doc);
+        });
+      });
+      return data;
     },
-    getEventsByGroupId(groupId){
+    async getAllEventsOfGroup(groupId){
+      let data = [];
       let groupRef = this.$firestore.collection("Groups").doc(groupId);
-      let groupEvents = this.$firestore.collection("Events").where("Group", "==", groupRef).get();
-      return groupEvents;
+      await this.$firestore.collection("Events").where("Group", "==", groupRef).get().then(function(querySnapshot){
+        querySnapshot.forEach(function(doc) {
+          data.push(doc);
+        });});
+      return data;
+    },
+    async getUserByUserId(userId){
+      let docRef = this.$firestore.collection("users").doc(userId);
+      var returnValue
+      await docRef.get().then(function(doc) {
+        if (doc.exists) {
+          returnValue = doc.data()
+        }
+      }).catch(function(error) {
+        console.log("Error getting user:", error);
+      });
+      return returnValue;
+    },
+    async createNewGroup(){
+      let userID = this.$fb.auth().currentUser.uid;
+      let userRef = this.$firestore.collection("users").doc(userID);
+      let timeCreated = Date.now()
+
+      try {
+        if(this.newGroupName == "") { throw "Bitte Gruppenname vergeben"}
+        this.$firestore.collection("Groups").add({
+          Name: this.newGroupName,
+          Created: timeCreated,
+          Creator: userRef,
+          Users: [userRef],
+          Admins: [userRef]
+        })
+      }catch (error){
+        console.log(error);
+        alert("Bitte fülle alle Felder aus");
+        return;
+      }
+      // Close popup if event created successfully
+      this.prompt = false;
+      await this.getGroupsData()
+    },
+    isAdminUser(adminList, userId){
+      // if no userId has been provided, use the logged in user
+      if(!userId){
+        userId = this.$fb.auth().currentUser.uid;
+      }
+
+      for(let admin of adminList){
+        if(admin.id == userId) return true
+      }
+      return false
     }
   },
   async created() {
