@@ -96,7 +96,7 @@
                           v-for="item in event.Items">
                           <q-item-section avatar>
                             <q-avatar size="28px">
-                              <img src="https://cdn.pixabay.com/photo/2018/01/13/19/39/fashion-3080644__480.jpg">
+                              <img :src="item.Creator.profilePhoto">
                             </q-avatar>
                           </q-item-section>
                           <q-item-section>
@@ -114,8 +114,8 @@
                       <div class="text-h6 q-pa-sm">Teilnehmer:
                         <div class="q-gutter-x-sm">
                           <q-avatar class="q-pa-sm" size="28px"
-                                    v-for="user in event.Group">
-                            <img src="https://cdn.pixabay.com/photo/2018/01/13/19/39/fashion-3080644__480.jpg">
+                                    v-for="user in event.Participants">
+                            <img :src="user.profilePhoto">
                           </q-avatar>
                         </div>
                       </div>
@@ -125,7 +125,6 @@
               </q-card>
             </div>
             <br>
-            </br>
           </div>
         </div>
       </div>
@@ -175,17 +174,18 @@ export default {
         }
       }
 
-      // Fill all items with data
+      // Replace references with data
       for (let event of allEvents)
       {
+        // Replace item references
         let items = event.Items
         for (let itemIndex in items)
         {
-          items[itemIndex] = await this.getItemByItemId(items[itemIndex].id)
+          items[itemIndex]         = await this.getItemByItemId(items[itemIndex].id)
           items[itemIndex].Creator = await this.getUserByUserId(items[itemIndex].Creator.id)
           items[itemIndex].Shopper = await this.getUserByUserId(items[itemIndex].Shopper.id)
         }
-
+        // Replace creator reference with name
         if (event.Creator){
           let creator = await this.getUserByUserId(event.Creator.id)
           if(creator){
@@ -194,8 +194,27 @@ export default {
             event.Creator = ""
           }
         }
+        // Add all participant to the events
+        // let users = await this.getAllUsersOfGroup(event.Group.id)
+        // console.log(users)
+        // for(let userRef of users)
+        // {
+        //   let user = await this.getUserByUserId(userRef.data().id)
+        //   console.log(user)
+        // }
+        event.Participants = []
+        let groupID = event.Group.id
+        let groupRef = await this.$firestore.collection("Groups").doc(groupID).get();
+        let group = groupRef.data();
+        for (let userRef of group.Users){
+          let user = await this.getUserByUserId(userRef.id)
+          event.Participants.push(user)
+        }
       }
 
+
+
+      // Add all group names to the drop down list
       for (let group of allGroups)
       {
         this.groups.push(group.data().Name)
@@ -213,6 +232,17 @@ export default {
           //console.log("Doc: ", doc, " Doc.id(): ", doc.id, " Doc.data(): ", doc.data());
           data.push(doc);
         });});
+      return data;
+    },
+
+    async getAllUsersOfGroup(groupId){
+      let data = [];
+      await this.$firestore.collection("Groups").doc(groupId).get().then(function(doc){
+        if (doc.exists){
+          // doc.data() is never undefined for query doc snapshots
+          //console.log("Doc: ", doc.data().Users);
+          data.push(doc.data().Users);
+        };});
       return data;
     },
 
