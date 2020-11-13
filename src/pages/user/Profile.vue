@@ -51,6 +51,7 @@ export default {
     return {}
   },
   created() {
+
     // Boolean to check if network is available
     const isOnline = window.navigator.onLine
     this.$q.loading.show({
