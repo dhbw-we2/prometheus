@@ -8,34 +8,50 @@
               <h4>Kommende Events</h4>
             </div>
             <div class="col">
-              <q-btn color="positive" class="float-right" icon="add" label="Neues Event erstellen" @click="prompt = true"/>
-
-              <q-dialog v-model="prompt" persistent>
-                <q-card style="min-width: 350px">
-                  <q-card-section>
-                    <div class="text-h6">Neues Event</div>
-                  </q-card-section>
-
-                  <q-card-section class="q-pt-none">
-                    <q-input label="Benenne dein Event" v-model="newEventName" autofocus />
-                    <q-input label="Wo findet es statt?" v-model="newEventLocation" />
-                    <q-select label="Für welche Gruppe?" v-model="newEventGroup" :options="groups"/>
-                    <q-input type="date" v-model="newEventDate" />
-                    <q-input type="time" v-model="newEventTime" />
-                  </q-card-section>
-
-                  <q-card-actions align="right" class="text-primary">
-                    <q-btn color="negative" flat label="Abbrechen" v-close-popup />
-                    <q-btn color="positive" flat label="Erstellen" @click="createNewEvent"/>
-                  </q-card-actions>
-                </q-card>
-              </q-dialog>
-
+              <q-btn color="positive" class="float-right" icon="add" label="Neues Event erstellen" @click="newEventPopup = true"/>
             </div>
           </div>
+          <q-dialog v-model="newEventPopup" persistent>
+            <q-card style="min-width: 350px">
+              <q-card-section>
+                <div class="text-h6">Neues Event</div>
+              </q-card-section>
+
+              <q-card-section class="q-pt-none">
+                <q-input label="Benenne dein Event" v-model="newEventName" autofocus />
+                <q-input label="Wo findet es statt?" v-model="newEventLocation" />
+                <q-select label="Für welche Gruppe?" v-model="newEventGroup" :options="groups"/>
+                <q-input type="date" v-model="newEventDate" />
+                <q-input type="time" v-model="newEventTime" />
+              </q-card-section>
+
+              <q-card-actions align="right" class="text-primary">
+                <q-btn color="negative" flat label="Abbrechen" v-close-popup />
+                <q-btn color="positive" flat label="Erstellen" @click="createNewEvent"/>
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
+          <q-dialog v-model="newItemPopup" persistent>
+            <q-card style="min-width: 350px">
+              <q-card-section>
+                <div class="text-h6">Neue Zutat</div>
+              </q-card-section>
+
+              <q-card-section class="q-pt-none">
+                <q-input label="Welche Zutat?" v-model="newItemName" autofocus />
+                <q-input label="Wie viel?" v-model="newItemAmount" />
+                <q-toggle label="Bringe ich mit" color="green" v-model="newItemIsShopperUser"/>
+              </q-card-section>
+
+              <q-card-actions align="right" class="text-primary">
+                <q-btn color="negative" flat label="Abbrechen" v-close-popup />
+                <q-btn color="positive" flat label="Hinzufügen" @click="createNewItem"/>
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
           <div class="row"
                v-for="event in events">
-            <div class="col">
+            <div class="col q-pb-md">
               <q-card class="my-card">
                 <q-card-section>
                   <div class="row items-center no-wrap">
@@ -104,6 +120,9 @@
                             <q-item-label caption>{{ item.Amount }}</q-item-label>
                           </q-item-section>
                         </q-item>
+                        <q-item>
+                          <q-btn color="positive" class="float-right" icon="add" label="Neue Zutat hinzufügen" @click="newItem(event.id)"/>
+                        </q-item>
                       </q-list>
                     </q-card>
                   </q-expansion-item>
@@ -124,7 +143,6 @@
                 </q-card-section>
               </q-card>
             </div>
-            <br>
           </div>
         </div>
       </div>
@@ -134,6 +152,7 @@
 
 <script>
 import {date} from "quasar";
+import firebase from 'firebase/app';
 
 export default {
   name: 'PageEvents',
@@ -143,12 +162,17 @@ export default {
       ],
       groups:[
       ],
-      prompt: false,
+      newEventPopup: false,
       newEventName: '',
       newEventLocation: '',
       newEventDate:'',
       newEventTime: '',
-      newEventGroup:''
+      newEventGroup:'',
+      newItemPopup: false,
+      newItemName: '',
+      newItemAmount: '',
+      newItemIsShopperUser: false,
+      newItemEventId: '',
     }
   },
   filters:{
@@ -170,7 +194,9 @@ export default {
       {
         let events = await this.getAllEventsOfGroup(group.id)
         for (let event of events){
-          allEvents.push(event.data());
+          let data = event.data()
+          data.id = event.id;
+          allEvents.push(data);
         }
       }
 
@@ -182,12 +208,21 @@ export default {
         for (let itemIndex in items)
         {
           items[itemIndex]         = await this.getItemByItemId(items[itemIndex].id)
-          items[itemIndex].Creator = await this.getUserByUserId(items[itemIndex].Creator.id)
-          items[itemIndex].Shopper = await this.getUserByUserId(items[itemIndex].Shopper.id)
+          let creatorRef = await this.getUserRefByUserId(items[itemIndex].Creator.id)
+          items[itemIndex].Creator = creatorRef.data()
+          let shopper
+            try{
+            let shopperRef = await this.getUserRefByUserId(items[itemIndex].Shopper.id)
+            shopper = shopperRef.data()
+          }catch (error){
+            shopper = ""
+          }
+          items[itemIndex].Shopper = shopper
         }
         // Replace creator reference with name
         if (event.Creator){
-          let creator = await this.getUserByUserId(event.Creator.id)
+          let creatorRef = await this.getUserRefByUserId(event.Creator.id)
+          let creator = creatorRef.data()
           if(creator){
             event.Creator = creator.fullName
           }else{
@@ -195,19 +230,13 @@ export default {
           }
         }
         // Add all participant to the events
-        // let users = await this.getAllUsersOfGroup(event.Group.id)
-        // console.log(users)
-        // for(let userRef of users)
-        // {
-        //   let user = await this.getUserByUserId(userRef.data().id)
-        //   console.log(user)
-        // }
         event.Participants = []
         let groupID = event.Group.id
         let groupRef = await this.$firestore.collection("Groups").doc(groupID).get();
         let group = groupRef.data();
-        for (let userRef of group.Users){
-          let user = await this.getUserByUserId(userRef.id)
+        for (let userRefs of group.Users){
+          let userRef = await this.getUserRefByUserId(userRefs.id)
+          let user = userRef.data()
           event.Participants.push(user)
         }
       }
@@ -220,7 +249,7 @@ export default {
         this.groups.push(group.data().Name)
       }
 
-      this.events = allEvents
+      this.events = allEvents.sort(function (a, b){return a.DateTime - b.DateTime})
     },
 
     async getAllGroupsOfUser(userId){
@@ -282,12 +311,12 @@ export default {
       return returnValue;
     },
 
-    async getUserByUserId(userId){
+    async getUserRefByUserId(userId){
       let docRef = this.$firestore.collection("users").doc(userId);
       var returnValue
       await docRef.get().then(function(doc) {
         if (doc.exists) {
-          returnValue = doc.data()
+          returnValue = doc
         }
       }).catch(function(error) {
         console.log("Error getting user:", error);
@@ -304,8 +333,8 @@ export default {
         let groups = await this.getGroupByName(this.newEventGroup);
         let groupId = groups[0].id;
         let groupRef = this.$firestore.collection("Groups").doc(groupId);
-        if(this.newEventName == ""){ throw "Empty Event Name"};
-        if(this.newEventLocation == ""){ throw "Empty Location"};
+        if(this.newEventName == ""){ throw "Empty event name"};
+        if(this.newEventLocation == ""){ throw "Empty location"};
         this.$firestore.collection("Events").add({
           Name: this.newEventName,
           Location: this.newEventLocation,
@@ -319,12 +348,62 @@ export default {
         return;
       }
       // Close popup if event created successfully
-      this.prompt = false;
+      this.newEventPopup = false;
       this.newEventGroup = ''
       this.newEventDate = ''
       this.newEventTime = ''
       this.newEventLocation = ''
       this.newEventName = ''
+    },
+
+    newItem(id)
+    {
+      this.newItemPopup = true;
+      this.newItemEventId = id;
+    },
+
+    async createNewItem(){
+        try {
+          let itemName = this.newItemName;
+          let itemAmount = this.newItemAmount;
+          if(itemName == ""){ throw "Error: Empty item name"};
+          if(itemAmount == ""){ throw "Error: Empty item amount"};
+          let activeUserReference = this.$firestore.collection("users").doc(this.$fb.auth().currentUser.uid);
+          let itemEventId = this.newItemEventId;
+          let itemShopperIsUser = this.newItemIsShopperUser;
+          let itemShopper;
+          if (itemShopperIsUser){
+            itemShopper = activeUserReference;
+          }else{
+            itemShopper = "";
+          }
+
+          let newItemReference = "";
+          await this.$firestore.collection("Items").add({
+            Name: itemName,
+            Amount: itemAmount,
+            Creator: activeUserReference,
+            Shopper: itemShopper
+          }).then(function(docRef){
+            //console.log("Document written with ID: ", docRef.id);
+            newItemReference = docRef;
+          });
+
+          let eventReference = this.$firestore.collection("Events").doc(itemEventId);
+          console.log(eventReference)
+          eventReference.update({
+            Items: firebase.firestore.FieldValue.arrayUnion(newItemReference)
+          })
+
+        }catch (error){
+          console.log(error);
+          alert("Bitte fülle alle Felder aus.");
+          return;
+        }
+      this.newItemName = '';
+      this.newItemAmount = '';
+      this.newItemEventId = '';
+      this.newItemIsShopperUser = false;
     }
   },
   async created() {
