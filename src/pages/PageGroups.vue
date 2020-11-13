@@ -71,9 +71,12 @@
                             <q-menu v-if="isAdminUser(group.Admins)" touch-position>
                               <q-list>
                                 <q-item v-if="!isAdminUser(group.Admins, user.id)" clickable v-close-popup>
-                                  <q-item-section>Zu Admin befördern</q-item-section>
+                                  <q-item-section @click="addToAdminList(group, user.id)">Zu Admin befördern</q-item-section>
                                 </q-item>
-                                <q-item clickable v-close-popup>
+                                <q-item v-if="!isLoggedInUser(user.id) && isAdminUser(group.Admins, user.id)" clickable v-close-popup>
+                                  <q-item-section @click="removeFromAdminList(group, user.id)">Admin-Rolle entfernen</q-item-section>
+                                </q-item>
+                                <q-item v-if="!isLoggedInUser(user.id)" clickable v-close-popup>
                                   <q-item-section color="primary">Aus der Gruppe entfernen</q-item-section>
                                 </q-item>
                               </q-list>
@@ -138,7 +141,7 @@ export default {
       {
         // get group-data
         let group = groupRef.data()
-
+        group.id = groupRef.id
         //get event-data
         let events = await this.getAllEventsOfGroup(groupRef.id)
         group.events = []
@@ -231,6 +234,44 @@ export default {
         if(admin.id == userId) return true
       }
       return false
+    },
+    async addToAdminList(group, userId) {
+      let groupData = await this.$firestore.collection("Groups").doc(group.id).get()
+      if(groupData.exists){
+        groupData = groupData.data()
+      }
+      let userRef = await this.$firestore.collection("users").doc(userId)
+      groupData.Admins.push(userRef)
+      await this.$firestore.collection('Groups').doc(group.id).update({
+        Admins: groupData.Admins
+      }).then(function () {
+        console.log("Updated succesfully")
+      })
+      await this.getGroupsData()
+    },
+    async removeFromAdminList(group, userId)
+    {
+      let userRef = await this.getUserByUserId(userId)
+      let groupData = await this.$firestore.collection("Groups").doc(group.id).get()
+      if(groupData.exists){
+        groupData = groupData.data()
+      }
+      for(let userIndex in groupData.Admins)
+      {
+        if(groupData.Admins[userIndex].id == userRef.id)
+        {
+          groupData.Admins.splice(userIndex, 1)
+        }
+      }
+      await this.$firestore.collection('Groups').doc(group.id).update({
+        Admins: groupData.Admins
+      }).then(function () {
+        console.log("Updated succesfully")
+      })
+      await this.getGroupsData()
+    },
+    isLoggedInUser(userId){
+      return userId == this.$fb.auth().currentUser.uid
     }
   },
   async created() {
