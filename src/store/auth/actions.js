@@ -7,9 +7,12 @@ import { firestoreAction } from 'vuexfire'
 import User from '../../models/User.js'
 
 export const addUserToUsersCollection = async function (state, userRef) {
-  const
-    { email } = state,
-    user = new User({ email })
+
+
+  let state2 = {fullName:state.email}
+  const { email } = state,
+        { fullName } = state2,
+    user = new User({email,fullName})
   return userRef.set(user)
 }
 
