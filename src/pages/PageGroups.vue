@@ -42,7 +42,7 @@
                         <q-menu cover auto-close>
                           <q-list>
                             <q-item clickable>
-                              <q-item-section>Gruppe verlassen</q-item-section>
+                              <q-item-section @click="leaveGroup(group)">Gruppe verlassen</q-item-section>
                             </q-item>
                             <q-item v-if="isAdminUser(group.Admins)" clickable>
                               <q-item-section>Freund hinzufügen</q-item-section>
@@ -77,7 +77,7 @@
                                   <q-item-section @click="removeFromAdminList(group, user.id)">Admin-Rolle entfernen</q-item-section>
                                 </q-item>
                                 <q-item v-if="!isLoggedInUser(user.id)" clickable v-close-popup>
-                                  <q-item-section color="primary">Aus der Gruppe entfernen</q-item-section>
+                                  <q-item-section @click="leaveGroup(group, user.id)">Aus der Gruppe entfernen</q-item-section>
                                 </q-item>
                               </q-list>
                             </q-menu>
@@ -251,18 +251,11 @@ export default {
     },
     async removeFromAdminList(group, userId)
     {
-      let userRef = await this.getUserByUserId(userId)
       let groupData = await this.$firestore.collection("Groups").doc(group.id).get()
       if(groupData.exists){
         groupData = groupData.data()
       }
-      for(let userIndex in groupData.Admins)
-      {
-        if(groupData.Admins[userIndex].id == userRef.id)
-        {
-          groupData.Admins.splice(userIndex, 1)
-        }
-      }
+      groupData.Admins = this.removeUserFromUserArray(userId, groupData.Admins)
       await this.$firestore.collection('Groups').doc(group.id).update({
         Admins: groupData.Admins
       }).then(function () {
@@ -272,6 +265,42 @@ export default {
     },
     isLoggedInUser(userId){
       return userId == this.$fb.auth().currentUser.uid
+    },
+    removeUserFromUserArray(userId, UserArray){
+      for(let userIndex in UserArray)
+      {
+        if(UserArray[userIndex].id == userId)
+        {
+          UserArray.splice(userIndex, 1)
+        }
+      }
+      return UserArray
+    },
+    async leaveGroup(group, userId) {
+      // if no userId has been provided, use the logged in user
+      if(!userId){
+        userId = this.$fb.auth().currentUser.uid;
+      }
+
+      let groupData = await this.$firestore.collection("Groups").doc(group.id).get()
+      if(groupData.exists){
+        groupData = groupData.data()
+      }
+      // remove user from usersarray of group
+      groupData.Users = this.removeUserFromUserArray(userId, groupData.Users)
+
+      // check if user is an admin, therefore delete him from adminarray aswell
+      if(this.isAdminUser(groupData.Admins, userId))
+      {
+        groupData.Admins = this.removeUserFromUserArray(userId, groupData.Admins)
+      }
+      await this.$firestore.collection('Groups').doc(group.id).update({
+        Users: groupData.Users,
+        Admins: groupData.Admins
+      }).then(function () {
+        console.log("Updated succesfully")
+      })
+      await this.getGroupsData()
     }
   },
   async created() {
