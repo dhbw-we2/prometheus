@@ -188,6 +188,27 @@ export default {
 
       this.groups = viewData
     },
+    async getGroupsWithLoading()
+    {
+      this.$q.loading.show({
+        message:  'Deine Gruppen werden geladen...',
+        backgroundColor: 'grey',
+        spinner: QSpinnerGears,
+        customClass: 'loader'
+      })
+      try {
+        await this.getGroupsData()
+
+      } catch (err) {
+        console.error(err)
+        this.$q.notify({
+          message: "Ein Fehler ist aufgetreten: ${err}",
+          color: 'negative'
+        })
+      } finally {
+        this.$q.loading.hide()
+      }
+    },
     async getGroupsOfUser(userId) {
       let data = [];
       let userRef = this.$firestore.collection("users").doc(userId);
@@ -240,7 +261,7 @@ export default {
       }
       // Close popup if event created successfully
       this.newGroupPrompt = false;
-      await this.getGroupsData()
+      await this.getGroupsWithLoading()
     },
     isAdminUser(adminList, userId){
       // if no userId has been provided, use the logged in user
@@ -265,7 +286,7 @@ export default {
       }).then(function () {
         console.log("Updated succesfully")
       })
-      await this.getGroupsData()
+      await this.getGroupsWithLoading()
     },
     async removeFromAdminList(group, userId)
     {
@@ -279,7 +300,7 @@ export default {
       }).then(function () {
         console.log("Updated succesfully")
       })
-      await this.getGroupsData()
+      await this.getGroupsWithLoading()
     },
     isLoggedInUser(userId){
       return userId == this.$fb.auth().currentUser.uid
@@ -318,7 +339,7 @@ export default {
       }).then(function () {
         console.log("Updated succesfully")
       })
-      await this.getGroupsData()
+      await this.getGroupsWithLoading()
     },
     async getUserByUsername(username){
       let docRef = await this.$firestore.collection("users").where("fullName", "==", username).limit(1).get();
@@ -357,11 +378,11 @@ export default {
         console.log("Updated succesfully")
       })
       this.addUserPrompt = false;
-      await this.getGroupsData()
+      await this.getGroupsWithLoading()
     },
   },
   async created() {
-    await this.getGroupsData();
+    await this.getGroupsWithLoading();
   }
 }
 </script>
