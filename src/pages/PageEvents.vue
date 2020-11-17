@@ -49,6 +49,24 @@
               </q-card-actions>
             </q-card>
           </q-dialog>
+          <q-dialog v-model="deleteItemPopup" persistent>
+            <q-card style="min-width: 350px">
+              <q-card-section>
+                <div class="text-h6">Wisst du diese Zutat wirklich löschen?</div>
+              </q-card-section>
+
+              <q-card-section class="q-pt-none">
+                <q> Zutat: {{deleteItemName}}</q>
+                <q> Menge: {{deleteItemAmount}}</q>
+                <q> Hinzugefügt von: {{deleteItemCreator}}</q>
+              </q-card-section>
+
+              <q-card-actions align="right" class="text-primary">
+                <q-btn color="negative" flat label="Abbrechen" @click="resetDeleteItem" />
+                <q-btn color="positive" flat label="Löschen" @click="deleteItem"/>
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
           <div class="row"
                v-for="event in Events">
             <div class="col q-pb-md">
@@ -115,9 +133,16 @@
                               <img :src="item.Creator.profilePhoto">
                             </q-avatar>
                           </q-item-section>
+
+                          <q-item-section avatar>
+                            <q-btn round size="sm" color="orange" icon="add_task" />
+                          </q-item-section>
                           <q-item-section>
                             <q-item-label>{{ item.Name }}</q-item-label>
                             <q-item-label caption>{{ item.Amount }}</q-item-label>
+                          </q-item-section>
+                          <q-item-section avatar>
+                            <q-btn round size="sm" color="red" icon="delete" @click="deleteItemClick(event.id ,item.Id)"/>
                           </q-item-section>
                         </q-item>
                         <q-item>
@@ -173,6 +198,11 @@ export default {
       newItemAmount: '',
       newItemIsShopperUser: false,
       newItemEventId: '',
+      deleteItemPopup: false,
+      deleteItemId: '',
+      deleteItemName: '',
+      deleteItemAmount: '',
+      deleteItemCreator: '',
     }
   },
   filters:{
@@ -296,6 +326,7 @@ export default {
 
     async getItemDataById(itemID) {
       let newItem = await this.getItemByItemId(itemID)
+      newItem.Id = itemID
       let creatorRef = await this.getUserRefByUserId(newItem.Creator.id)
       newItem.Creator = creatorRef.data()
       let shopper
@@ -311,6 +342,7 @@ export default {
 
     async getItemData(item) {
       let newItem = await this.getItemByItemId(item.id)
+      newItem.Id = item.id
       let creatorRef = await this.getUserRefByUserId(newItem.Creator.id)
       newItem.Creator = creatorRef.data()
       let shopper
@@ -409,7 +441,7 @@ export default {
       this.newItemEventId = id;
     },
 
-    async refreshItemsOfEvent(eventID, newItemId) {
+    async addItemToEvent(eventID, newItemId) {
       let event = this.Events.find(event => event.id === eventID)
       event.LoadedItems.push(await this.getItemDataById(newItemId))
     },
@@ -448,7 +480,7 @@ export default {
           eventReference.update({
             Items: firebase.firestore.FieldValue.arrayUnion(newItemReference)
           })
-          this.refreshItemsOfEvent(itemEventId, newItemId)
+          this.addItemToEvent(itemEventId, newItemId)
         }catch (error){
           console.log(error);
           alert("Bitte fülle alle Felder aus.");
@@ -458,7 +490,68 @@ export default {
       this.newItemAmount = '';
       this.newItemEventId = '';
       this.newItemIsShopperUser = false;
-    }
+    },
+
+    async deleteItemClick(eventId, itemId) {
+      let item = await this.getItemDataById(itemId)
+      this.deleteItemId = item.Id
+      console.log()
+      this.deleteItemEventId = eventId
+      this.deleteItemName = item.Name
+      this.deleteItemAmount = item.Amount
+      this.deleteItemCreator = item.Creator.fullName
+      this.deleteItemPopup = true
+    },
+
+    async deleteItem() {
+      let eventData = await this.$firestore.collection("Events").doc(this.deleteItemEventId).get();
+      if(eventData.exists){
+        eventData = eventData.data()
+      }
+
+      eventData.Users = this.removeFromArray(this.deleteItemId, eventData.Items)
+      await this.$firestore.collection("Events").doc(this.deleteItemEventId).update({
+        Items: eventData.Items
+      }).then(function () {
+        console.log("Deleted Item successfully")
+      })
+
+      let eventItems = this.Events.find(event => event.id === this.deleteItemEventId).Items
+
+      for (let index = 0; index < eventItems.length; index++)
+      {
+        console.log(eventItems[index])
+        if (eventItems[index].id !== this.deleteItemId){
+          eventItems.splice(index, 1)
+          break
+        }
+      }
+      let event = this.Events.find(event => event.id === this.deleteItemEventId)
+      event.Items = eventItems
+
+      this.resetDeleteItem()
+    },
+
+    resetDeleteItem() {
+      this.deleteItemId = ''
+      this.deleteItemEventId = ''
+      this.deleteItemName = ''
+      this.deleteItemAmount = ''
+      this.deleteItemCreator = ''
+      this.deleteItemPopup = false
+    },
+
+    removeFromArray(id, array){
+      for(let index in array)
+      {
+        if(array[index].id === id)
+        {
+          array.splice(index, 1)
+        }
+      }
+      return array
+    },
+
   },
   created() {
     this.loadData();
