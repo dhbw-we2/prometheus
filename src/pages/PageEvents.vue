@@ -303,26 +303,17 @@ export default {
     async loadAllItemsOfEvent(event) {
       event.LoadedItems = []
       event.ItemsFinished = ""
-      let itemsFinised = true
       for (let itemIndex in event.Items)
       {
         try {
           let item = await this.getItemData(event.Items[itemIndex])
-          if (item.Shopper === "") {
-            itemsFinised = false
-          }
           event.LoadedItems.push(await this.getItemData(event.Items[itemIndex]))
         }catch (error){
           console.warn("Could not load item " + event.Items[itemIndex].id + "! \n " +
             "Maybe item got deleted but reference in the event is still pointing on it")
         }
       }
-      if (itemsFinised)
-      {
-        event.ItemsFinished = "Alles wird mitgebracht."
-      }else {
-        event.ItemsFinished = "Noch nicht alle Zutaten werden mitgebracht!"
-      }
+      this.evaluateItemStatusOfEvent(event)
     },
 
     async loadCreatorOfEvent(event) {
@@ -440,7 +431,6 @@ export default {
         alert("Bitte fülle alle Felder aus.")
         return;
       }
-      // Close popup if event created successfully
       this.newEventPopup = false;
       this.newEventGroup = ''
       this.newEventDate = ''
@@ -503,6 +493,7 @@ export default {
       this.newItemAmount = '';
       this.newItemEventId = '';
       this.newItemIsShopperUser = false;
+      this.newItemPopup = false;
     },
 
     async deleteItemClick(eventId, itemId) {
@@ -527,7 +518,7 @@ export default {
         Items: eventData.Items
       })
 
-      let eventItems = this.Events.find(event => event.id === this.deleteItemEventId).Items
+      let eventItems = this.Events.find(event => event.id === this.deleteItemEventId).LoadedItems
 
       for (let index = 0; index < eventItems.length; index++)
       {
@@ -541,6 +532,7 @@ export default {
       event.Items = eventItems
 
       this.resetDeleteItem()
+      this.evaluateItemStatusOfEvent(event)
     },
 
     resetDeleteItem() {
@@ -563,22 +555,45 @@ export default {
       return array
     },
 
-    assignItemToUser(eventId, itemId) {
+    async assignItemToUser(eventId, itemId) {
       let currentUserRef = this.$firestore.collection("users").doc(this.currentUserId());
       let itemRef = this.$firestore.collection("Items").doc(itemId).update({
         Shopper: currentUserRef
       })
-      let newItemData = this.getItemDataById(itemId)
-      let oldItem = this.Events.find(event => event.id === eventId).Items.find(item => item.Id === itemId)
-      oldItem = newItemData
+
+      let event = this.Events.find(event => event.id === eventId)
+      let item = event.LoadedItems.find(item => item.Id === itemId)
+      let shopperRef = await this.getUserRefByUserId(this.currentUserId())
+      item.Shopper = shopperRef.data()
+      this.evaluateItemStatusOfEvent(event)
     },
 
     stopShopItem(eventId, itemId) {
       let itemRef = this.$firestore.collection("Items").doc(itemId).update({
         Shopper: firebase.firestore.FieldValue.delete()
       })
+      let event = this.Events.find(event => event.id === eventId)
+      let item = event.LoadedItems.find(item => item.Id === itemId)
+      item.Shopper = ''
+      this.evaluateItemStatusOfEvent(event)
     },
-
+    async evaluateItemStatusOfEvent(event)
+    {
+      let itemsFinished = true;
+      for(let item of event.LoadedItems){
+        if (item.Shopper === "")
+        {
+          itemsFinished = false
+          break
+        }
+      }
+      if (itemsFinished)
+      {
+        event.ItemsFinished = "Alles wird mitgebracht."
+      }else {
+        event.ItemsFinished = "Noch nicht alle Zutaten werden mitgebracht!"
+      }
+    }
   },
   created() {
     this.loadData();
