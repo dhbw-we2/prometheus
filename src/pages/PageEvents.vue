@@ -8,34 +8,68 @@
               <h4>Kommende Events</h4>
             </div>
             <div class="col">
-              <q-btn color="positive" class="float-right" icon="add" label="Neues Event erstellen" @click="prompt = true"/>
-
-              <q-dialog v-model="prompt" persistent>
-                <q-card style="min-width: 350px">
-                  <q-card-section>
-                    <div class="text-h6">Neues Event</div>
-                  </q-card-section>
-
-                  <q-card-section class="q-pt-none">
-                    <q-input label="Benenne dein Event" v-model="newEventName" autofocus />
-                    <q-input label="Wo findet es statt?" v-model="newEventLocation" />
-                    <q-select label="Für welche Gruppe?" v-model="newEventGroup" :options="groups"/>
-                    <q-input type="date" v-model="newEventDate" />
-                    <q-input type="time" v-model="newEventTime" />
-                  </q-card-section>
-
-                  <q-card-actions align="right" class="text-primary">
-                    <q-btn color="negative" flat label="Abbrechen" v-close-popup />
-                    <q-btn color="positive" flat label="Erstellen" @click="createNewEvent"/>
-                  </q-card-actions>
-                </q-card>
-              </q-dialog>
-
+              <q-btn color="positive" class="float-right" icon="add" label="Neues Event erstellen" @click="newEventPopup = true"/>
             </div>
           </div>
+          <q-dialog v-model="newEventPopup" persistent>
+            <q-card style="min-width: 350px">
+              <q-card-section>
+                <div class="text-h6">Neues Event</div>
+              </q-card-section>
+
+              <q-card-section class="q-pt-none">
+                <q-input label="Benenne dein Event" v-model="newEventName" autofocus />
+                <q-input label="Wo findet es statt?" v-model="newEventLocation" />
+                <q-select label="Für welche Gruppe?" v-model="newEventGroup" :options="groups"/>
+                <q-input type="date" v-model="newEventDate" />
+                <q-input type="time" v-model="newEventTime" />
+              </q-card-section>
+
+              <q-card-actions align="right" class="text-primary">
+                <q-btn color="negative" flat label="Abbrechen" v-close-popup />
+                <q-btn color="positive" flat label="Erstellen" @click="createNewEvent"/>
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
+          <q-dialog v-model="newItemPopup" persistent>
+            <q-card style="min-width: 350px">
+              <q-card-section>
+                <div class="text-h6">Neue Zutat</div>
+              </q-card-section>
+
+              <q-card-section class="q-pt-none">
+                <q-input label="Welche Zutat?" v-model="newItemName" autofocus />
+                <q-input label="Wie viel?" v-model="newItemAmount" />
+                <q-toggle label="Bringe ich mit" color="green" v-model="newItemIsShopperUser"/>
+              </q-card-section>
+
+              <q-card-actions align="right" class="text-primary">
+                <q-btn color="negative" flat label="Abbrechen" v-close-popup />
+                <q-btn color="positive" flat label="Hinzufügen" @click="createNewItem"/>
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
+          <q-dialog v-model="deleteItemPopup" persistent>
+            <q-card style="min-width: 350px">
+              <q-card-section>
+                <div class="text-h6">Wisst du diese Zutat wirklich löschen?</div>
+              </q-card-section>
+
+              <q-card-section class="q-pt-none">
+                <div> Zutat: {{deleteItemName}} </div>
+                <div> Menge: {{deleteItemAmount}}</div>
+                <div> Hinzugefügt von: {{deleteItemCreator}}</div>
+              </q-card-section>
+
+              <q-card-actions align="right" class="text-primary">
+                <q-btn color="negative" flat label="Abbrechen" @click="resetDeleteItem" />
+                <q-btn color="positive" flat label="Löschen" @click="deleteItem"/>
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
           <div class="row"
-               v-for="event in events">
-            <div class="col">
+               v-for="event in Events">
+            <div class="col q-pb-md">
               <q-card class="my-card">
                 <q-card-section>
                   <div class="row items-center no-wrap">
@@ -88,21 +122,43 @@
                     expand-separator
                     icon="list"
                     label="Zutaten"
-                    caption="noch nicht vollständig"
+                    :caption="event.ItemsFinished"
                   >
                     <q-card>
                       <q-list>
                         <q-item
-                          v-for="item in event.Items">
+                          v-for="item in event.LoadedItems">
                           <q-item-section avatar>
                             <q-avatar size="28px">
                               <img :src="item.Creator.profilePhoto">
+                            </q-avatar>
+                          </q-item-section>
+
+                          <q-item-section v-if="item.Shopper === ''" avatar>
+                            <q-btn round size="sm" color="orange" icon="add_task" @click="assignItemToUser(event.id, item.Id)"/>
+                          </q-item-section>
+                          <q-item-section v-else-if="item.Shopper.id === currentUserId()" avatar>
+                            <q-btn round size="sm" color="red" @click="stopShopItem(event.id, item.Id)">
+                              <q-avatar size="28px">
+                                <img :src="item.Shopper.profilePhoto">
+                              </q-avatar>
+                            </q-btn>
+                          </q-item-section>
+                          <q-item-section v-else avatar>
+                            <q-avatar size="28px">
+                              <img :src="item.Shopper.profilePhoto">
                             </q-avatar>
                           </q-item-section>
                           <q-item-section>
                             <q-item-label>{{ item.Name }}</q-item-label>
                             <q-item-label caption>{{ item.Amount }}</q-item-label>
                           </q-item-section>
+                          <q-item-section avatar>
+                            <q-btn round size="sm" color="red" icon="delete" @click="deleteItemClick(event.id ,item.Id)"/>
+                          </q-item-section>
+                        </q-item>
+                        <q-item>
+                          <q-btn color="positive" class="float-right" icon="add" label="Neue Zutat hinzufügen" @click="newItem(event.id)"/>
                         </q-item>
                       </q-list>
                     </q-card>
@@ -124,7 +180,6 @@
                 </q-card-section>
               </q-card>
             </div>
-            <br>
           </div>
         </div>
       </div>
@@ -134,21 +189,33 @@
 
 <script>
 import {date} from "quasar";
+import firebase from 'firebase/app';
+import {currentUser} from "src/store/user/getters";
 
 export default {
   name: 'PageEvents',
   data () {
     return {
-      events: [
+      Events: [
       ],
       groups:[
       ],
-      prompt: false,
+      newEventPopup: false,
       newEventName: '',
       newEventLocation: '',
       newEventDate:'',
       newEventTime: '',
-      newEventGroup:''
+      newEventGroup:'',
+      newItemPopup: false,
+      newItemName: '',
+      newItemAmount: '',
+      newItemIsShopperUser: false,
+      newItemEventId: '',
+      deleteItemPopup: false,
+      deleteItemId: '',
+      deleteItemName: '',
+      deleteItemAmount: '',
+      deleteItemCreator: '',
     }
   },
   filters:{
@@ -158,84 +225,142 @@ export default {
     }
   },
   methods:{
-    async getGroupsData()
-    {
-      // Get User and his groups
-      let userId = this.$fb.auth().currentUser.uid;
-      let allGroups = await this.getAllGroupsOfUser(userId);
-
-      // Get all events of all groups of the user
-      let allEvents = []
-      for (let group of allGroups)
-      {
-        let events = await this.getAllEventsOfGroup(group.id)
-        for (let event of events){
-          allEvents.push(event.data());
-        }
-      }
-
-      // Replace references with data
-      for (let event of allEvents)
-      {
-        // Replace item references
-        let items = event.Items
-        for (let itemIndex in items)
-        {
-          items[itemIndex]         = await this.getItemByItemId(items[itemIndex].id)
-          items[itemIndex].Creator = await this.getUserByUserId(items[itemIndex].Creator.id)
-          items[itemIndex].Shopper = await this.getUserByUserId(items[itemIndex].Shopper.id)
-        }
-        // Replace creator reference with name
-        if (event.Creator){
-          let creator = await this.getUserByUserId(event.Creator.id)
-          if(creator){
-            event.Creator = creator.fullName
-          }else{
-            event.Creator = ""
-          }
-        }
-        // Add all participant to the events
-        // let users = await this.getAllUsersOfGroup(event.Group.id)
-        // console.log(users)
-        // for(let userRef of users)
-        // {
-        //   let user = await this.getUserByUserId(userRef.data().id)
-        //   console.log(user)
-        // }
-        event.Participants = []
-        let groupID = event.Group.id
-        let groupRef = await this.$firestore.collection("Groups").doc(groupID).get();
-        let group = groupRef.data();
-        for (let userRef of group.Users){
-          let user = await this.getUserByUserId(userRef.id)
-          event.Participants.push(user)
-        }
-      }
-
-
-
-      // Add all group names to the drop down list
-      for (let group of allGroups)
-      {
-        this.groups.push(group.data().Name)
-      }
-
-      this.events = allEvents
+    async loadData() {
+      let allGroupsOfUser = await this.getAllGroupsOfUser(this.currentUserId())
+      this.loadNameOfGroups(allGroupsOfUser)
+      this.loadDataOfEvents(await this.getEventsOfGroups(allGroupsOfUser))
     },
 
-    async getAllGroupsOfUser(userId){
+    currentUserId() {
+      return this.$fb.auth().currentUser.uid
+    },
+
+    async getAllGroupsOfUser(userId) {
       let data = [];
       let userRef = this.$firestore.collection("users").doc(userId);
-      await this.$firestore.collection("Groups").where("Users", "array-contains", userRef).get().then(function(querySnapshot){
-        querySnapshot.forEach(function(doc) {
-          // doc.data() is never undefined for query doc snapshots
-          //console.log("Doc: ", doc, " Doc.id(): ", doc.id, " Doc.data(): ", doc.data());
-          data.push(doc);
-        });});
+      await this.$firestore.collection("Groups").where("Users", "array-contains", userRef).get()
+        .then(function(querySnapshot){
+          querySnapshot.forEach(function(doc) {
+            data.push(doc);
+          });
+        });
       return data;
     },
 
-    async getAllUsersOfGroup(groupId){
+    async loadNameOfGroups(groups) {
+      for (let group of groups)
+      {
+        this.groups.push(group.data().Name)
+      }
+    },
+
+    async getEventsOfGroups(groups) {
+      let allEvents = []
+      for (let group of groups)
+      {
+        let events = [];
+        let groupRef = this.$firestore.collection("Groups").doc(group.id);
+        await this.$firestore.collection("Events").where("Group", "==", groupRef).get()
+          .then(function(querySnapshot){
+            querySnapshot.forEach(function(doc) {
+              events.push(doc);
+            });
+          });
+        for (let event of events){
+          let data = event.data()
+          data.id = event.id
+          allEvents.push(data)
+        }
+      }
+      return allEvents.sort(function (a, b){return a.DateTime - b.DateTime})
+    },
+
+    async loadDataOfEvents(eventsToLoad) {
+      for (let event of eventsToLoad){
+        await this.loadEventData(event)
+      }
+    },
+
+    async loadEventData(event) {
+      this.loadAllItemsOfEvent(event)
+      await this.loadCreatorOfEvent(event)
+      await this.loadAllParticipantsOfEvent(event)
+      this.Events.push(event)
+    },
+
+    async loadAllParticipantsOfEvent(event) {
+      event.Participants = []
+      let groupID = event.Group.id
+      let groupRef = await this.$firestore.collection("Groups").doc(groupID).get();
+      let group = groupRef.data();
+      for (let userRefs of group.Users){
+        let userRef = await this.getUserRefByUserId(userRefs.id)
+        let user = userRef.data()
+        event.Participants.push(user)
+      }
+    },
+
+    async loadAllItemsOfEvent(event) {
+      event.LoadedItems = []
+      event.ItemsFinished = ""
+      for (let itemIndex in event.Items)
+      {
+        try {
+          let item = await this.getItemData(event.Items[itemIndex])
+          event.LoadedItems.push(await this.getItemData(event.Items[itemIndex]))
+        }catch (error){
+          console.warn("Could not load item " + event.Items[itemIndex].id + "! \n " +
+            "Maybe item got deleted but reference in the event is still pointing on it")
+        }
+      }
+      this.evaluateItemStatusOfEvent(event)
+    },
+
+    async loadCreatorOfEvent(event) {
+      if (event.Creator){
+        let creatorRef = await this.getUserRefByUserId(event.Creator.id)
+        let creator = creatorRef.data()
+        if(creator){
+          event.Creator = creator.fullName
+        }else{
+          event.Creator = ""
+        }
+      }
+    },
+
+    async getItemDataById(itemID) {
+      let newItem = await this.getItemByItemId(itemID)
+      newItem.Id = itemID
+      let creatorRef = await this.getUserRefByUserId(newItem.Creator.id)
+      newItem.Creator = creatorRef.data()
+      let shopper
+      try{
+        let shopperRef = await this.getUserRefByUserId(newItem.Shopper.id)
+        shopper = shopperRef.data()
+      }catch (error){
+        shopper = ""
+      }
+      newItem.Shopper = shopper
+      return newItem
+    },
+
+    async getItemData(item) {
+      let newItem = await this.getItemByItemId(item.id)
+      newItem.Id = item.id
+      let creatorRef = await this.getUserRefByUserId(newItem.Creator.id)
+      newItem.Creator = creatorRef.data()
+      let shopper
+      try{
+        let shopperRef = await this.getUserRefByUserId(newItem.Shopper.id)
+        shopper = shopperRef.data()
+      }catch (error){
+        shopper = ""
+      }
+      newItem.Shopper = shopper
+      return newItem
+    },
+
+    async getAllUsersOfGroup(groupId) {
       let data = [];
       await this.$firestore.collection("Groups").doc(groupId).get().then(function(doc){
         if (doc.exists){
@@ -246,19 +371,7 @@ export default {
       return data;
     },
 
-    async getAllEventsOfGroup(groupId){
-      let data = [];
-      let groupRef = this.$firestore.collection("Groups").doc(groupId);
-      await this.$firestore.collection("Events").where("Group", "==", groupRef).get().then(function(querySnapshot){
-        querySnapshot.forEach(function(doc) {
-          // doc.data() is never undefined for query doc snapshots
-          //console.log("Doc: ", doc, " Doc.id(): ", doc.id, " Doc.data(): ", doc.data());
-          data.push(doc);
-        });});
-      return data;
-    },
-
-    async getGroupByName(groupName){
+    async getGroupByName(groupName) {
       let data = [];
       await this.$firestore.collection("Groups").where("Name", "==", groupName).get().then(function(querySnapshot){
         querySnapshot.forEach(function(doc) {
@@ -269,7 +382,7 @@ export default {
       return data;
     },
 
-    async getItemByItemId(itemId){
+    async getItemByItemId(itemId) {
       let docRef = this.$firestore.collection("Items").doc(itemId);
       var returnValue
       await docRef.get().then(function(doc) {
@@ -282,12 +395,12 @@ export default {
       return returnValue;
     },
 
-    async getUserByUserId(userId){
+    async getUserRefByUserId(userId) {
       let docRef = this.$firestore.collection("users").doc(userId);
       var returnValue
       await docRef.get().then(function(doc) {
         if (doc.exists) {
-          returnValue = doc.data()
+          returnValue = doc
         }
       }).catch(function(error) {
         console.log("Error getting user:", error);
@@ -295,7 +408,7 @@ export default {
       return returnValue;
     },
 
-    async createNewEvent(){
+    async createNewEvent() {
        try {
         let dateTime = new Date(this.newEventDate + "T" + this.newEventTime);
         let userID = this.$fb.auth().currentUser.uid;
@@ -304,8 +417,8 @@ export default {
         let groups = await this.getGroupByName(this.newEventGroup);
         let groupId = groups[0].id;
         let groupRef = this.$firestore.collection("Groups").doc(groupId);
-        if(this.newEventName == ""){ throw "Empty Event Name"};
-        if(this.newEventLocation == ""){ throw "Empty Location"};
+        if(this.newEventName == ""){ throw "Empty event name"};
+        if(this.newEventLocation == ""){ throw "Empty location"};
         this.$firestore.collection("Events").add({
           Name: this.newEventName,
           Location: this.newEventLocation,
@@ -318,17 +431,172 @@ export default {
         alert("Bitte fülle alle Felder aus.")
         return;
       }
-      // Close popup if event created successfully
-      this.prompt = false;
+      this.newEventPopup = false;
       this.newEventGroup = ''
       this.newEventDate = ''
       this.newEventTime = ''
       this.newEventLocation = ''
       this.newEventName = ''
+    },
+
+    newItem(id) {
+      this.newItemPopup = true;
+      this.newItemEventId = id;
+    },
+
+    async addItemToEvent(eventID, newItemId) {
+      let event = this.Events.find(event => event.id === eventID)
+      event.LoadedItems.push(await this.getItemDataById(newItemId))
+    },
+
+    async createNewItem() {
+        try {
+          let itemName = this.newItemName;
+          let itemAmount = this.newItemAmount;
+          if(itemName === ""){ throw "Error: Empty item name"};
+          if(itemAmount === ""){ throw "Error: Empty item amount"};
+          let activeUserReference = this.$firestore.collection("users").doc(this.$fb.auth().currentUser.uid);
+          let itemEventId = this.newItemEventId;
+          let itemShopperIsUser = this.newItemIsShopperUser;
+          let itemShopper;
+          if (itemShopperIsUser){
+            itemShopper = activeUserReference;
+          }else{
+            itemShopper = "";
+          }
+
+          let newItemReference = "";
+          let newItemId
+          await this.$firestore.collection("Items").add({
+            Name: itemName,
+            Amount: itemAmount,
+            Creator: activeUserReference,
+            Shopper: itemShopper
+          }).then(function(docRef){
+            //console.log("Document written with ID: ", docRef.id);
+            newItemReference = docRef;
+            newItemId = docRef.id
+          });
+
+          let eventReference = this.$firestore.collection("Events").doc(itemEventId);
+
+          eventReference.update({
+            Items: firebase.firestore.FieldValue.arrayUnion(newItemReference)
+          })
+          this.addItemToEvent(itemEventId, newItemId)
+        }catch (error){
+          console.log(error);
+          alert("Bitte fülle alle Felder aus.");
+          return;
+        }
+      this.newItemName = '';
+      this.newItemAmount = '';
+      this.newItemEventId = '';
+      this.newItemIsShopperUser = false;
+      this.newItemPopup = false;
+    },
+
+    async deleteItemClick(eventId, itemId) {
+      let item = await this.getItemDataById(itemId)
+      this.deleteItemId = item.Id
+      console.log()
+      this.deleteItemEventId = eventId
+      this.deleteItemName = item.Name
+      this.deleteItemAmount = item.Amount
+      this.deleteItemCreator = item.Creator.fullName
+      this.deleteItemPopup = true
+    },
+
+    async deleteItem() {
+      let eventData = await this.$firestore.collection("Events").doc(this.deleteItemEventId).get();
+      if(eventData.exists){
+        eventData = eventData.data()
+      }
+
+      eventData.Users = this.removeFromArray(this.deleteItemId, eventData.Items)
+      await this.$firestore.collection("Events").doc(this.deleteItemEventId).update({
+        Items: eventData.Items
+      })
+
+      let eventItems = this.Events.find(event => event.id === this.deleteItemEventId).LoadedItems
+
+      for (let index = 0; index < eventItems.length; index++)
+      {
+        console.log(eventItems[index])
+        if (eventItems[index].id !== this.deleteItemId){
+          eventItems.splice(index, 1)
+          break
+        }
+      }
+      let event = this.Events.find(event => event.id === this.deleteItemEventId)
+      event.Items = eventItems
+
+      this.resetDeleteItem()
+      this.evaluateItemStatusOfEvent(event)
+    },
+
+    resetDeleteItem() {
+      this.deleteItemId = ''
+      this.deleteItemEventId = ''
+      this.deleteItemName = ''
+      this.deleteItemAmount = ''
+      this.deleteItemCreator = ''
+      this.deleteItemPopup = false
+    },
+
+    removeFromArray(id, array){
+      for(let index in array)
+      {
+        if(array[index].id === id)
+        {
+          array.splice(index, 1)
+        }
+      }
+      return array
+    },
+
+    async assignItemToUser(eventId, itemId) {
+      let currentUserRef = this.$firestore.collection("users").doc(this.currentUserId());
+      let itemRef = this.$firestore.collection("Items").doc(itemId).update({
+        Shopper: currentUserRef
+      })
+
+      let event = this.Events.find(event => event.id === eventId)
+      let item = event.LoadedItems.find(item => item.Id === itemId)
+      let shopperRef = await this.getUserRefByUserId(this.currentUserId())
+      item.Shopper = shopperRef.data()
+      this.evaluateItemStatusOfEvent(event)
+    },
+
+    stopShopItem(eventId, itemId) {
+      let itemRef = this.$firestore.collection("Items").doc(itemId).update({
+        Shopper: firebase.firestore.FieldValue.delete()
+      })
+      let event = this.Events.find(event => event.id === eventId)
+      let item = event.LoadedItems.find(item => item.Id === itemId)
+      item.Shopper = ''
+      this.evaluateItemStatusOfEvent(event)
+    },
+    async evaluateItemStatusOfEvent(event)
+    {
+      let itemsFinished = true;
+      for(let item of event.LoadedItems){
+        if (item.Shopper === "")
+        {
+          itemsFinished = false
+          break
+        }
+      }
+      if (itemsFinished)
+      {
+        event.ItemsFinished = "Alles wird mitgebracht."
+      }else {
+        event.ItemsFinished = "Noch nicht alle Zutaten werden mitgebracht!"
+      }
     }
   },
-  async created() {
-    await this.getGroupsData();
+  created() {
+    this.loadData();
   }
 }
 </script>
