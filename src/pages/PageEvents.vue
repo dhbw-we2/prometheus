@@ -56,9 +56,9 @@
               </q-card-section>
 
               <q-card-section class="q-pt-none">
-                <q> Zutat: {{deleteItemName}}</q>
-                <q> Menge: {{deleteItemAmount}}</q>
-                <q> Hinzugefügt von: {{deleteItemCreator}}</q>
+                <div> Zutat: {{deleteItemName}} </div>
+                <div> Menge: {{deleteItemAmount}}</div>
+                <div> Hinzugefügt von: {{deleteItemCreator}}</div>
               </q-card-section>
 
               <q-card-actions align="right" class="text-primary">
@@ -134,8 +134,20 @@
                             </q-avatar>
                           </q-item-section>
 
-                          <q-item-section avatar>
-                            <q-btn round size="sm" color="orange" icon="add_task" />
+                          <q-item-section v-if="item.Shopper === ''" avatar>
+                            <q-btn round size="sm" color="orange" icon="add_task" @click="assignItemToUser(event.id, item.Id)"/>
+                          </q-item-section>
+                          <q-item-section v-else-if="item.Shopper.id === currentUserId()" avatar>
+                            <q-btn round size="sm" color="red" @click="stopShopItem(event.id, item.Id)">
+                              <q-avatar size="28px">
+                                <img :src="item.Shopper.profilePhoto">
+                              </q-avatar>
+                            </q-btn>
+                          </q-item-section>
+                          <q-item-section v-else avatar>
+                            <q-avatar size="28px">
+                              <img :src="item.Shopper.profilePhoto">
+                            </q-avatar>
                           </q-item-section>
                           <q-item-section>
                             <q-item-label>{{ item.Name }}</q-item-label>
@@ -178,6 +190,7 @@
 <script>
 import {date} from "quasar";
 import firebase from 'firebase/app';
+import {currentUser} from "src/store/user/getters";
 
 export default {
   name: 'PageEvents',
@@ -512,8 +525,6 @@ export default {
       eventData.Users = this.removeFromArray(this.deleteItemId, eventData.Items)
       await this.$firestore.collection("Events").doc(this.deleteItemEventId).update({
         Items: eventData.Items
-      }).then(function () {
-        console.log("Deleted Item successfully")
       })
 
       let eventItems = this.Events.find(event => event.id === this.deleteItemEventId).Items
@@ -550,6 +561,22 @@ export default {
         }
       }
       return array
+    },
+
+    assignItemToUser(eventId, itemId) {
+      let currentUserRef = this.$firestore.collection("users").doc(this.currentUserId());
+      let itemRef = this.$firestore.collection("Items").doc(itemId).update({
+        Shopper: currentUserRef
+      })
+      let newItemData = this.getItemDataById(itemId)
+      let oldItem = this.Events.find(event => event.id === eventId).Items.find(item => item.Id === itemId)
+      oldItem = newItemData
+    },
+
+    stopShopItem(eventId, itemId) {
+      let itemRef = this.$firestore.collection("Items").doc(itemId).update({
+        Shopper: firebase.firestore.FieldValue.delete()
+      })
     },
 
   },
