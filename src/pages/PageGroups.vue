@@ -154,39 +154,54 @@ export default {
       let allGroupRefs = await this.getGroupsOfUser(userId);
 
       // get all data related to the group
-      let viewData = []
+      this.groups = []
       for (let groupRef of allGroupRefs)
       {
-        // get group-data
-        let group = groupRef.data()
-        group.id = groupRef.id
-        //get event-data
-        let events = await this.getAllEventsOfGroup(groupRef.id)
-        group.events = []
-        for (let event of events){
-          group.events.push(event.data())
-        }
+        let group = await this.loadGroupByRef(groupRef)
 
-        //get user-data
-        let usersData = []
-        for (let userRef of group.Users){
-          let user = await this.getUserByUserId(userRef.id)
-          usersData.push(user)
-        }
-        group.Users = usersData
-
-        //get admins-data
-        let adminData = []
-        for (let adminRef of group.Admins){
-          let admin = await this.getUserByUserId(adminRef.id)
-          adminData.push(admin)
-        }
-        group.Admins = adminData
-
-        viewData.push(group)
+        this.groups.push(group)
       }
+    },
+    async loadGroupByRef(groupRef)
+    {
+      // get group-data
+      let group = groupRef.data()
+      group.id = groupRef.id
 
-      this.groups = viewData
+      //get event-data
+      this.fillEventData(group)
+
+      //get user-data
+      this.fillUserData(group)
+
+      //get admins-data
+      this.fillAdminData(group)
+
+      return group
+    },
+    async fillEventData(group){
+      let events = await this.getAllEventsOfGroup(group.id)
+      group.events = []
+      for (let event of events){
+        group.events.push(event.data())
+        console.log(event.data())
+      }
+    },
+    async fillUserData(group){
+      let usersData = []
+      for (let userRef of group.Users){
+        let user = await this.getUserByUserId(userRef.id)
+        usersData.push(user)
+      }
+      group.Users = usersData
+    },
+    async fillAdminData(group){
+      let adminData = []
+      for (let adminRef of group.Admins){
+        let admin = await this.getUserByUserId(adminRef.id)
+        adminData.push(admin)
+      }
+      group.Admins = adminData
     },
     async getGroupsWithLoading()
     {
