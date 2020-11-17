@@ -1,14 +1,14 @@
 <template>
   <q-page class="flex-center bg-negative">
     <div class="row">
-      <div class="col col-8 offset-0 col-md-5 offset-md-1">
-        <div class="row flex-center justify-start">
+      <div class="columnLeft" style="margin-left: 5px; margin-right: 5px;">
+        <div class="flex-center justify-start">
           <div class="col text-white">
             <h4>Meine Anstehenden Events</h4>
           </div>
         </div>
         <q-card class="my-card">
-          <div style="max-width: 800px; width: 100%;">
+          <div class="calendarCard" style="max-width: 1650px; width: 100%;">
             <div class="row justify-center items-center">
               <q-btn flat label="Prev" @click="calendarPrev" />
               <q-separator vertical />
@@ -53,13 +53,13 @@
         </q-card>
       </div>
 
-      <div class="col col-3 offset-1">
-        <div class="row flex-center justify-start">
-          <div class="col text-white">
+      <div class="columnRight">
+        <div class="flex-center justify-start">
+          <div class="text-white">
             <h4>Einladungen</h4>
           </div>
 
-          <q-list bordered class="rounded-borders" style="max-width: 600px; background-color: white">
+          <q-list bordered class="rounded-borders" style="max-width: 700px; background-color: white">
             <q-item-label header>Ausstehende Einladungen</q-item-label>
 
             <q-item>
@@ -269,7 +269,36 @@ export default {
 }
 </script>
 
+<style lang="stylus">
+/* Create two equal columns that floats next to each other */
+.columnLeft {
+  float: left;
+  width: 45%;
+  padding: 10px;
+}
+.columnRight {
+  float: left;
+  width: 40%;
+  padding: 10px;
+}
 
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 600px) {
+  .columnLeft {
+    width: 100%;
+  }
+  .columnRight{
+    width: 100%;
+  }
+}
+</style>
 
 
 
