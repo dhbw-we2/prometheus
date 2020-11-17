@@ -50,7 +50,7 @@
             </q-card>
           </q-dialog>
           <div class="row"
-               v-for="event in events">
+               v-for="event in Events">
             <div class="col q-pb-md">
               <q-card class="my-card">
                 <q-card-section>
@@ -104,12 +104,12 @@
                     expand-separator
                     icon="list"
                     label="Zutaten"
-                    caption="noch nicht vollständig"
+                    :caption="event.ItemsFinished"
                   >
                     <q-card>
                       <q-list>
                         <q-item
-                          v-for="item in event.Items">
+                          v-for="item in event.LoadedItems">
                           <q-item-section avatar>
                             <q-avatar size="28px">
                               <img :src="item.Creator.profilePhoto">
@@ -158,7 +158,7 @@ export default {
   name: 'PageEvents',
   data () {
     return {
-      events: [
+      Events: [
       ],
       groups:[
       ],
@@ -182,89 +182,149 @@ export default {
     }
   },
   methods:{
-    async getGroupsData()
-    {
-      // Get User and his groups
-      let userId = this.$fb.auth().currentUser.uid;
-      let allGroups = await this.getAllGroupsOfUser(userId);
-
-      // Get all events of all groups of the user
-      let allEvents = []
-      for (let group of allGroups)
-      {
-        let events = await this.getAllEventsOfGroup(group.id)
-        for (let event of events){
-          let data = event.data()
-          data.id = event.id;
-          allEvents.push(data);
-        }
-      }
-
-      // Replace references with data
-      for (let event of allEvents)
-      {
-        // Replace item references
-        let items = event.Items
-        for (let itemIndex in items)
-        {
-          items[itemIndex]         = await this.getItemByItemId(items[itemIndex].id)
-          let creatorRef = await this.getUserRefByUserId(items[itemIndex].Creator.id)
-          items[itemIndex].Creator = creatorRef.data()
-          let shopper
-            try{
-            let shopperRef = await this.getUserRefByUserId(items[itemIndex].Shopper.id)
-            shopper = shopperRef.data()
-          }catch (error){
-            shopper = ""
-          }
-          items[itemIndex].Shopper = shopper
-        }
-        // Replace creator reference with name
-        if (event.Creator){
-          let creatorRef = await this.getUserRefByUserId(event.Creator.id)
-          let creator = creatorRef.data()
-          if(creator){
-            event.Creator = creator.fullName
-          }else{
-            event.Creator = ""
-          }
-        }
-        // Add all participant to the events
-        event.Participants = []
-        let groupID = event.Group.id
-        let groupRef = await this.$firestore.collection("Groups").doc(groupID).get();
-        let group = groupRef.data();
-        for (let userRefs of group.Users){
-          let userRef = await this.getUserRefByUserId(userRefs.id)
-          let user = userRef.data()
-          event.Participants.push(user)
-        }
-      }
-
-
-
-      // Add all group names to the drop down list
-      for (let group of allGroups)
-      {
-        this.groups.push(group.data().Name)
-      }
-
-      this.events = allEvents.sort(function (a, b){return a.DateTime - b.DateTime})
+    async loadData() {
+      let allGroupsOfUser = await this.getAllGroupsOfUser(this.currentUserId())
+      this.loadNameOfGroups(allGroupsOfUser)
+      this.loadDataOfEvents(await this.getEventsOfGroups(allGroupsOfUser))
     },
 
-    async getAllGroupsOfUser(userId){
+    currentUserId() {
+      return this.$fb.auth().currentUser.uid
+    },
+
+    async getAllGroupsOfUser(userId) {
       let data = [];
       let userRef = this.$firestore.collection("users").doc(userId);
-      await this.$firestore.collection("Groups").where("Users", "array-contains", userRef).get().then(function(querySnapshot){
-        querySnapshot.forEach(function(doc) {
-          // doc.data() is never undefined for query doc snapshots
-          //console.log("Doc: ", doc, " Doc.id(): ", doc.id, " Doc.data(): ", doc.data());
-          data.push(doc);
-        });});
+      await this.$firestore.collection("Groups").where("Users", "array-contains", userRef).get()
+        .then(function(querySnapshot){
+          querySnapshot.forEach(function(doc) {
+            data.push(doc);
+          });
+        });
       return data;
     },
 
-    async getAllUsersOfGroup(groupId){
+    async loadNameOfGroups(groups) {
+      for (let group of groups)
+      {
+        this.groups.push(group.data().Name)
+      }
+    },
+
+    async getEventsOfGroups(groups) {
+      let allEvents = []
+      for (let group of groups)
+      {
+        let events = [];
+        let groupRef = this.$firestore.collection("Groups").doc(group.id);
+        await this.$firestore.collection("Events").where("Group", "==", groupRef).get()
+          .then(function(querySnapshot){
+            querySnapshot.forEach(function(doc) {
+              events.push(doc);
+            });
+          });
+        for (let event of events){
+          let data = event.data()
+          data.id = event.id
+          allEvents.push(data)
+        }
+      }
+      return allEvents.sort(function (a, b){return a.DateTime - b.DateTime})
+    },
+
+    async loadDataOfEvents(eventsToLoad) {
+      for (let event of eventsToLoad){
+        await this.loadEventData(event)
+      }
+    },
+
+    async loadEventData(event) {
+      this.loadAllItemsOfEvent(event)
+      await this.loadCreatorOfEvent(event)
+      await this.loadAllParticipantsOfEvent(event)
+      this.Events.push(event)
+    },
+
+    async loadAllParticipantsOfEvent(event) {
+      event.Participants = []
+      let groupID = event.Group.id
+      let groupRef = await this.$firestore.collection("Groups").doc(groupID).get();
+      let group = groupRef.data();
+      for (let userRefs of group.Users){
+        let userRef = await this.getUserRefByUserId(userRefs.id)
+        let user = userRef.data()
+        event.Participants.push(user)
+      }
+    },
+
+    async loadAllItemsOfEvent(event) {
+      event.LoadedItems = []
+      event.ItemsFinished = ""
+      let itemsFinised = true
+      for (let itemIndex in event.Items)
+      {
+        try {
+          let item = await this.getItemData(event.Items[itemIndex])
+          if (item.Shopper === "") {
+            itemsFinised = false
+          }
+          event.LoadedItems.push(await this.getItemData(event.Items[itemIndex]))
+        }catch (error){
+          console.warn("Could not load item " + event.Items[itemIndex].id + "! \n " +
+            "Maybe item got deleted but reference in the event is still pointing on it")
+        }
+      }
+      if (itemsFinised)
+      {
+        event.ItemsFinished = "Alles wird mitgebracht."
+      }else {
+        event.ItemsFinished = "Noch nicht alle Zutaten werden mitgebracht!"
+      }
+    },
+
+    async loadCreatorOfEvent(event) {
+      if (event.Creator){
+        let creatorRef = await this.getUserRefByUserId(event.Creator.id)
+        let creator = creatorRef.data()
+        if(creator){
+          event.Creator = creator.fullName
+        }else{
+          event.Creator = ""
+        }
+      }
+    },
+
+    async getItemDataById(itemID) {
+      let newItem = await this.getItemByItemId(itemID)
+      let creatorRef = await this.getUserRefByUserId(newItem.Creator.id)
+      newItem.Creator = creatorRef.data()
+      let shopper
+      try{
+        let shopperRef = await this.getUserRefByUserId(newItem.Shopper.id)
+        shopper = shopperRef.data()
+      }catch (error){
+        shopper = ""
+      }
+      newItem.Shopper = shopper
+      return newItem
+    },
+
+    async getItemData(item) {
+      let newItem = await this.getItemByItemId(item.id)
+      let creatorRef = await this.getUserRefByUserId(newItem.Creator.id)
+      newItem.Creator = creatorRef.data()
+      let shopper
+      try{
+        let shopperRef = await this.getUserRefByUserId(newItem.Shopper.id)
+        shopper = shopperRef.data()
+      }catch (error){
+        shopper = ""
+      }
+      newItem.Shopper = shopper
+      return newItem
+    },
+
+    async getAllUsersOfGroup(groupId) {
       let data = [];
       await this.$firestore.collection("Groups").doc(groupId).get().then(function(doc){
         if (doc.exists){
@@ -275,19 +335,7 @@ export default {
       return data;
     },
 
-    async getAllEventsOfGroup(groupId){
-      let data = [];
-      let groupRef = this.$firestore.collection("Groups").doc(groupId);
-      await this.$firestore.collection("Events").where("Group", "==", groupRef).get().then(function(querySnapshot){
-        querySnapshot.forEach(function(doc) {
-          // doc.data() is never undefined for query doc snapshots
-          //console.log("Doc: ", doc, " Doc.id(): ", doc.id, " Doc.data(): ", doc.data());
-          data.push(doc);
-        });});
-      return data;
-    },
-
-    async getGroupByName(groupName){
+    async getGroupByName(groupName) {
       let data = [];
       await this.$firestore.collection("Groups").where("Name", "==", groupName).get().then(function(querySnapshot){
         querySnapshot.forEach(function(doc) {
@@ -298,7 +346,7 @@ export default {
       return data;
     },
 
-    async getItemByItemId(itemId){
+    async getItemByItemId(itemId) {
       let docRef = this.$firestore.collection("Items").doc(itemId);
       var returnValue
       await docRef.get().then(function(doc) {
@@ -311,7 +359,7 @@ export default {
       return returnValue;
     },
 
-    async getUserRefByUserId(userId){
+    async getUserRefByUserId(userId) {
       let docRef = this.$firestore.collection("users").doc(userId);
       var returnValue
       await docRef.get().then(function(doc) {
@@ -324,7 +372,7 @@ export default {
       return returnValue;
     },
 
-    async createNewEvent(){
+    async createNewEvent() {
        try {
         let dateTime = new Date(this.newEventDate + "T" + this.newEventTime);
         let userID = this.$fb.auth().currentUser.uid;
@@ -356,18 +404,22 @@ export default {
       this.newEventName = ''
     },
 
-    newItem(id)
-    {
+    newItem(id) {
       this.newItemPopup = true;
       this.newItemEventId = id;
     },
 
-    async createNewItem(){
+    async refreshItemsOfEvent(eventID, newItemId) {
+      let event = this.Events.find(event => event.id === eventID)
+      event.LoadedItems.push(await this.getItemDataById(newItemId))
+    },
+
+    async createNewItem() {
         try {
           let itemName = this.newItemName;
           let itemAmount = this.newItemAmount;
-          if(itemName == ""){ throw "Error: Empty item name"};
-          if(itemAmount == ""){ throw "Error: Empty item amount"};
+          if(itemName === ""){ throw "Error: Empty item name"};
+          if(itemAmount === ""){ throw "Error: Empty item amount"};
           let activeUserReference = this.$firestore.collection("users").doc(this.$fb.auth().currentUser.uid);
           let itemEventId = this.newItemEventId;
           let itemShopperIsUser = this.newItemIsShopperUser;
@@ -379,6 +431,7 @@ export default {
           }
 
           let newItemReference = "";
+          let newItemId
           await this.$firestore.collection("Items").add({
             Name: itemName,
             Amount: itemAmount,
@@ -387,14 +440,15 @@ export default {
           }).then(function(docRef){
             //console.log("Document written with ID: ", docRef.id);
             newItemReference = docRef;
+            newItemId = docRef.id
           });
 
           let eventReference = this.$firestore.collection("Events").doc(itemEventId);
-          console.log(eventReference)
+
           eventReference.update({
             Items: firebase.firestore.FieldValue.arrayUnion(newItemReference)
           })
-
+          this.refreshItemsOfEvent(itemEventId, newItemId)
         }catch (error){
           console.log(error);
           alert("Bitte fülle alle Felder aus.");
@@ -406,8 +460,8 @@ export default {
       this.newItemIsShopperUser = false;
     }
   },
-  async created() {
-    await this.getGroupsData();
+  created() {
+    this.loadData();
   }
 }
 </script>
