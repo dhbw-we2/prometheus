@@ -88,9 +88,14 @@ export default {
       this.photoType = ''
     },
     async ruleNickname(nickname) {
+      let userID = this.$fb.auth().currentUser.uid;
+      let userRef = this.$firestore.collection("users").doc(userID);
       if (!nickname) return 'Bitte Nutzernamen ändern...'
       const snapshot = await this.$firestore.collection('users').where('fullName', '==', nickname).get()
-      if (!snapshot.empty) {
+      console.log(snapshot)
+      console.log(nickname)
+      console.log(this.currentUser.fullName)
+      if (!snapshot.empty && nickname != this.currentUser.fullName) {
         this.step = 0
         return 'Nutzername nicht verfügbar!'
       }
