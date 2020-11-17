@@ -8,8 +8,8 @@
               <h4>Meine Gruppen</h4>
             </div>
             <div class="col">
-              <q-btn color="positive" class="float-right" icon="add" label="Neue Gruppe erstellen" @click="prompt = true"/>
-              <q-dialog v-model="prompt" persistent>
+              <q-btn color="positive" class="float-right" icon="add" label="Neue Gruppe erstellen" @click="newGroupPrompt = true"/>
+              <q-dialog v-model="newGroupPrompt" persistent>
                 <q-card style="min-width: 350px">
                   <q-card-section>
                     <div class="text-h6">Neue Gruppe erstellen</div>
@@ -39,13 +39,29 @@
                     </div>
                     <div class="col-auto">
                       <q-btn color="grey-7" round flat icon="more_vert">
-                        <q-menu cover auto-close>
+                        <q-menu cover>
                           <q-list>
                             <q-item clickable>
-                              <q-item-section>Gruppe verlassen</q-item-section>
+                              <q-item-section @click="leaveGroup(group)">Gruppe verlassen</q-item-section>
                             </q-item>
                             <q-item v-if="isAdminUser(group.Admins)" clickable>
-                              <q-item-section>Freund hinzufügen</q-item-section>
+                              <q-item-section @click="addUserPrompt = true">Freund hinzufügen</q-item-section>
+                              <q-dialog v-model="addUserPrompt" persistent>
+                                <q-card style="min-width: 350px">
+                                  <q-card-section>
+                                    <div class="text-h6">Freund hinzufügen</div>
+                                  </q-card-section>
+
+                                  <q-card-section class="q-pt-none">
+                                    <q-input label="Gib den Nutzername deines Freundes ein" v-model="addUserUsername" autofocus  />
+                                  </q-card-section>
+
+                                  <q-card-actions align="right" class="text-primary">
+                                    <q-btn flat label="Abbrechen" v-close-popup />
+                                    <q-btn flat color="positive" label="Hinzufügen" @click="addUserToGroup(group.id)" />
+                                  </q-card-actions>
+                                </q-card>
+                              </q-dialog>
                             </q-item>
                           </q-list>
                         </q-menu>
@@ -77,7 +93,7 @@
                                   <q-item-section @click="removeFromAdminList(group, user.id)">Admin-Rolle entfernen</q-item-section>
                                 </q-item>
                                 <q-item v-if="!isLoggedInUser(user.id)" clickable v-close-popup>
-                                  <q-item-section color="primary">Aus der Gruppe entfernen</q-item-section>
+                                  <q-item-section @click="leaveGroup(group, user.id)">Aus der Gruppe entfernen</q-item-section>
                                 </q-item>
                               </q-list>
                             </q-menu>
@@ -119,8 +135,10 @@ export default {
     return {
       groups: [
       ],
-      prompt: false,
-      newGroupName: ""
+      newGroupPrompt: false,
+      newGroupName: "",
+      addUserPrompt: false,
+      addUserUsername: ""
     }
   },
   filters:{
@@ -221,7 +239,7 @@ export default {
         return;
       }
       // Close popup if event created successfully
-      this.prompt = false;
+      this.newGroupPrompt = false;
       await this.getGroupsData()
     },
     isAdminUser(adminList, userId){
@@ -251,18 +269,11 @@ export default {
     },
     async removeFromAdminList(group, userId)
     {
-      let userRef = await this.getUserByUserId(userId)
       let groupData = await this.$firestore.collection("Groups").doc(group.id).get()
       if(groupData.exists){
         groupData = groupData.data()
       }
-      for(let userIndex in groupData.Admins)
-      {
-        if(groupData.Admins[userIndex].id == userRef.id)
-        {
-          groupData.Admins.splice(userIndex, 1)
-        }
-      }
+      groupData.Admins = this.removeUserFromUserArray(userId, groupData.Admins)
       await this.$firestore.collection('Groups').doc(group.id).update({
         Admins: groupData.Admins
       }).then(function () {
@@ -272,7 +283,82 @@ export default {
     },
     isLoggedInUser(userId){
       return userId == this.$fb.auth().currentUser.uid
-    }
+    },
+    removeUserFromUserArray(userId, UserArray){
+      for(let userIndex in UserArray)
+      {
+        if(UserArray[userIndex].id == userId)
+        {
+          UserArray.splice(userIndex, 1)
+        }
+      }
+      return UserArray
+    },
+    async leaveGroup(group, userId) {
+      // if no userId has been provided, use the logged in user
+      if(!userId){
+        userId = this.$fb.auth().currentUser.uid;
+      }
+
+      let groupData = await this.$firestore.collection("Groups").doc(group.id).get()
+      if(groupData.exists){
+        groupData = groupData.data()
+      }
+      // remove user from usersarray of group
+      groupData.Users = this.removeUserFromUserArray(userId, groupData.Users)
+
+      // check if user is an admin, therefore delete him from adminarray aswell
+      if(this.isAdminUser(groupData.Admins, userId))
+      {
+        groupData.Admins = this.removeUserFromUserArray(userId, groupData.Admins)
+      }
+      await this.$firestore.collection('Groups').doc(group.id).update({
+        Users: groupData.Users,
+        Admins: groupData.Admins
+      }).then(function () {
+        console.log("Updated succesfully")
+      })
+      await this.getGroupsData()
+    },
+    async getUserByUsername(username){
+      let docRef = await this.$firestore.collection("users").where("fullName", "==", username).limit(1).get();
+      let user
+      if(!docRef.empty)
+      {
+        // since this reference only points to one user, just "for each" over that one user to get data
+        docRef.forEach(doc => {
+          user = doc.data()
+        })
+        let userRef = await this.$firestore.collection("users").doc(user.id)
+        return userRef
+      }
+      return undefined
+    },
+    // adds the Username stored in data-object ot the group
+    async addUserToGroup(groupId) {
+      let userToAddRef = await this.getUserByUsername(this.addUserUsername)
+      if(!userToAddRef)
+      {
+        this.$q.notify({
+          type: 'negative',
+          message: 'Kein Nutzer mit diesem Nutzername gefunden.'
+        })
+        this.addUserPrompt = false;
+        return;
+      }
+      let groupData = await this.$firestore.collection("Groups").doc(groupId).get()
+      if(groupData.exists){
+        groupData = groupData.data()
+      }
+      groupData.Users.push(userToAddRef)
+      await this.$firestore.collection('Groups').doc(groupId).update({
+        Users: groupData.Users
+      }).then(function () {
+        console.log("Updated succesfully")
+      })
+      this.addUserPrompt = false;
+      await this.getGroupsData()
+    },
   },
   async created() {
     await this.getGroupsData();

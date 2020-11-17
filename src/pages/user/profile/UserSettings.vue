@@ -22,7 +22,7 @@
       <section class="user-info">
         <h6 class="q-mt-none q-mb-md text-center">Edit Your Profile</h6>
         <div class="row justify-between items-center q-mb-lg"><label class="col-3" for="fullName">Name</label>
-          <q-input class="col" id="fullName" v-model="fullName" borderless="borderless" dense="dense" type="text"></q-input>
+          <q-input class="col" id="fullName" v-model="fullName" :rules="[ruleNickname]" borderless="borderless" dense="dense" type="text"></q-input>
         </div>
         <div class="row justify-between items-center q-mb-lg"><label class="col-3" for="email">Email</label>
           <q-input class="col" id="email" v-model="email" borderless="borderless" dense="dense" type="text"></q-input>
@@ -86,6 +86,19 @@ export default {
     ...mapMutations('user', ['setEditUserDialog']),
     resetPhotoType () {
       this.photoType = ''
+    },
+    async ruleNickname(nickname) {
+      let userID = this.$fb.auth().currentUser.uid;
+      let userRef = this.$firestore.collection("users").doc(userID);
+      if (!nickname) return 'Bitte Nutzernamen ändern...'
+      const snapshot = await this.$firestore.collection('users').where('fullName', '==', nickname).get()
+      console.log(snapshot)
+      console.log(nickname)
+      console.log(this.currentUser.fullName)
+      if (!snapshot.empty && nickname != this.currentUser.fullName) {
+        this.step = 0
+        return 'Nutzername nicht verfügbar!'
+      }
     },
     async saveUserData () {
       const { currentUser, email, fullName, mobile } = this
