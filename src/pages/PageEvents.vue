@@ -120,7 +120,7 @@
                 <q-card-section>
                   <q-expansion-item
                     expand-separator
-                    icon="list"
+                    :icon="event.ItemsFinishedIcon"
                     label="Zutaten"
                     :caption="event.ItemsFinished"
                   >
@@ -247,7 +247,6 @@ export default {
       } finally {
         this.$q.loading.hide()
       }
-
     },
 
     currentUserId() {
@@ -262,6 +261,8 @@ export default {
           querySnapshot.forEach(function(doc) {
             data.push(doc);
           });
+        }).catch(function(error) {
+          console.warn("Error in firebase access: getting all groups of user: " + userId + error);
         });
       return data;
     },
@@ -284,6 +285,8 @@ export default {
             querySnapshot.forEach(function(doc) {
               events.push(doc);
             });
+          }).catch(function(error) {
+            console.warn("Error in firebase access: getting all events of group: " + group.id + error);
           });
         for (let event of events){
           let data = event.data()
@@ -322,6 +325,7 @@ export default {
     async loadAllItemsOfEvent(event) {
       event.LoadedItems = []
       event.ItemsFinished = ""
+      event.ItemsFinishedIcon = ""
       for (let itemIndex in event.Items)
       {
         try {
@@ -329,7 +333,7 @@ export default {
           event.LoadedItems.push(await this.getItemData(event.Items[itemIndex]))
         }catch (error){
           console.warn("Could not load item " + event.Items[itemIndex].id + "! \n " +
-            "Maybe item got deleted but reference in the event is still pointing on it")
+            "Possible that item got deleted but reference in the event is still pointing on it")
         }
       }
       this.evaluateItemStatusOfEvent(event)
@@ -383,8 +387,6 @@ export default {
       let data = [];
       await this.$firestore.collection("Groups").doc(groupId).get().then(function(doc){
         if (doc.exists){
-          // doc.data() is never undefined for query doc snapshots
-          //console.log("Doc: ", doc.data().Users);
           data.push(doc.data().Users);
         };});
       return data;
@@ -392,12 +394,14 @@ export default {
 
     async getGroupByName(groupName) {
       let data = [];
-      await this.$firestore.collection("Groups").where("Name", "==", groupName).get().then(function(querySnapshot){
-        querySnapshot.forEach(function(doc) {
-          // doc.data() is never undefined for query doc snapshots
-          //console.log("Doc: ", doc, " Doc.id(): ", doc.id, " Doc.data(): ", doc.data());
-          data.push(doc);
-        });});
+      await this.$firestore.collection("Groups").where("Name", "==", groupName).get()
+        .then(function(querySnapshot){
+          querySnapshot.forEach(function(doc) {
+            data.push(doc);
+          });
+        }).catch(function(error) {
+          console.warn("Error in firebase access: getting group by name: " + groupName + error);
+      });
       return data;
     },
 
@@ -409,7 +413,7 @@ export default {
           returnValue = doc.data()
         }
       }).catch(function(error) {
-        console.log("Error getting item:", error);
+        console.warn("Error in firebase access: getting item: " + itemId + error);
       });
       return returnValue;
     },
@@ -422,7 +426,7 @@ export default {
           returnValue = doc
         }
       }).catch(function(error) {
-        console.log("Error getting user:", error);
+        console.warn("Error in firebase access: getting user reference by id:" + userId + error);
       });
       return returnValue;
     },
@@ -446,7 +450,6 @@ export default {
           Group: groupRef
         })
       }catch (error){
-        console.log(error);
         alert("Bitte fülle alle Felder aus.")
         return;
       }
@@ -466,6 +469,7 @@ export default {
     async addItemToEvent(eventID, newItemId) {
       let event = this.Events.find(event => event.id === eventID)
       event.LoadedItems.push(await this.getItemDataById(newItemId))
+      this.evaluateItemStatusOfEvent(event)
     },
 
     async createNewItem() {
@@ -492,7 +496,6 @@ export default {
             Creator: activeUserReference,
             Shopper: itemShopper
           }).then(function(docRef){
-            //console.log("Document written with ID: ", docRef.id);
             newItemReference = docRef;
             newItemId = docRef.id
           });
@@ -501,10 +504,12 @@ export default {
 
           eventReference.update({
             Items: firebase.firestore.FieldValue.arrayUnion(newItemReference)
+          }).catch(function(error){
+            console.warn("Error in firebase access: updating Items in event: " + itemEventId + error)
           })
           this.addItemToEvent(itemEventId, newItemId)
+
         }catch (error){
-          console.log(error);
           alert("Bitte fülle alle Felder aus.");
           return;
         }
@@ -513,12 +518,12 @@ export default {
       this.newItemEventId = '';
       this.newItemIsShopperUser = false;
       this.newItemPopup = false;
+
     },
 
     async deleteItemClick(eventId, itemId) {
       let item = await this.getItemDataById(itemId)
       this.deleteItemId = item.Id
-      console.log()
       this.deleteItemEventId = eventId
       this.deleteItemName = item.Name
       this.deleteItemAmount = item.Amount
@@ -535,13 +540,14 @@ export default {
       eventData.Users = this.removeFromArray(this.deleteItemId, eventData.Items)
       await this.$firestore.collection("Events").doc(this.deleteItemEventId).update({
         Items: eventData.Items
-      })
+      }).catch(function(error) {
+        console.warn("Error in firebase access: updating items of event: " + this.deleteItemEventId + error);
+      });
 
       let eventItems = this.Events.find(event => event.id === this.deleteItemEventId).LoadedItems
 
       for (let index = 0; index < eventItems.length; index++)
       {
-        console.log(eventItems[index])
         if (eventItems[index].id !== this.deleteItemId){
           eventItems.splice(index, 1)
           break
@@ -578,7 +584,9 @@ export default {
       let currentUserRef = this.$firestore.collection("users").doc(this.currentUserId());
       let itemRef = this.$firestore.collection("Items").doc(itemId).update({
         Shopper: currentUserRef
-      })
+      }).catch(function(error) {
+        console.warn("Error in firebase access: updating shopper of item: " + itemId + error);
+      });
 
       let event = this.Events.find(event => event.id === eventId)
       let item = event.LoadedItems.find(item => item.Id === itemId)
@@ -590,14 +598,16 @@ export default {
     stopShopItem(eventId, itemId) {
       let itemRef = this.$firestore.collection("Items").doc(itemId).update({
         Shopper: firebase.firestore.FieldValue.delete()
-      })
+      }).catch(function(error) {
+        console.warn("Error in firebase access: deleting shopper of item: " + itemId + error);
+      });
       let event = this.Events.find(event => event.id === eventId)
       let item = event.LoadedItems.find(item => item.Id === itemId)
       item.Shopper = ''
       this.evaluateItemStatusOfEvent(event)
     },
-    async evaluateItemStatusOfEvent(event)
-    {
+
+    async evaluateItemStatusOfEvent(event) {
       let itemsFinished = true;
       for(let item of event.LoadedItems){
         if (item.Shopper === "")
@@ -606,11 +616,17 @@ export default {
           break
         }
       }
-      if (itemsFinished)
+      if (event.LoadedItems.length === 0){
+        event.ItemsFinished = "Es wurden noch keine Zutaten eingetragen"
+        event.ItemsFinishedIcon = "playlist_add"
+      }
+      else if (itemsFinished)
       {
         event.ItemsFinished = "Alles wird mitgebracht."
+        event.ItemsFinishedIcon = "playlist_add_check"
       }else {
         event.ItemsFinished = "Noch nicht alle Zutaten werden mitgebracht!"
+        event.ItemsFinishedIcon = "rule"
       }
     }
   },
