@@ -190,6 +190,7 @@
 <script>
 import {date} from "quasar";
 import firebase from 'firebase/app';
+import { QSpinnerGears } from 'quasar'
 import {currentUser} from "src/store/user/getters";
 
 export default {
@@ -226,9 +227,27 @@ export default {
   },
   methods:{
     async loadData() {
-      let allGroupsOfUser = await this.getAllGroupsOfUser(this.currentUserId())
-      this.loadNameOfGroups(allGroupsOfUser)
-      this.loadDataOfEvents(await this.getEventsOfGroups(allGroupsOfUser))
+      this.$q.loading.show({
+        message:  'Loading Events...',
+        backgroundColor: 'grey',
+        spinner: QSpinnerGears,
+        customClass: 'loader'
+      })
+      try {
+        let allGroupsOfUser = await this.getAllGroupsOfUser(this.currentUserId())
+        this.loadNameOfGroups(allGroupsOfUser)
+        this.loadDataOfEvents(await this.getEventsOfGroups(allGroupsOfUser))
+
+      } catch (err) {
+        console.error(err)
+        this.$q.notify({
+          message: 'An error as occured: ${err}',
+          color: 'negative'
+        })
+      } finally {
+        this.$q.loading.hide()
+      }
+
     },
 
     currentUserId() {

@@ -184,7 +184,6 @@ export default {
       group.events = []
       for (let event of events){
         group.events.push(event.data())
-        console.log(event.data())
       }
     },
     async fillUserData(group){
