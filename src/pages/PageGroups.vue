@@ -380,6 +380,7 @@ export default {
           message: 'Kein Nutzer mit diesem Nutzername gefunden.'
         })
         this.addUserPrompt = false;
+        this.addUserUsername = "";
         return;
       }
       let groupData = await this.$firestore.collection("Groups").doc(groupId).get()
@@ -393,6 +394,7 @@ export default {
         console.log("Updated succesfully")
       })
       this.addUserPrompt = false;
+      this.addUserUsername = "";
       await this.getGroupsWithLoading()
     },
   },
