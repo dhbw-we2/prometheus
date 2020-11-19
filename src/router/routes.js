@@ -4,11 +4,11 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/PageStart.vue') },
+      { path: '', component: () => import('pages/PageStart.vue')},
       { path: '/Start', component: () => import('pages/PageStart.vue')},
-      { path: '/Home', component: () => import('pages/PageHome.vue')},
-      { path: '/Events', component: () => import('pages/PageEvents.vue')},
-      { path: '/Groups', component: () => import('pages/PageGroups.vue')},
+      { path: '/Home', component: () => import('pages/PageHome.vue'), meta: {requiresAuth: true}},
+      { path: '/Events', component: () => import('pages/PageEvents.vue'), meta: {requiresAuth: true}},
+      { path: '/Groups', component: () => import('pages/PageGroups.vue'), meta: {requiresAuth: true}},
     ]
   },
   {

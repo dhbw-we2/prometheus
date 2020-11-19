@@ -76,6 +76,7 @@ export default {
           type: 'info',
           message: "You are now logged out!"
         })
+        this.$router.push({ path: '/Start' })
       } catch (err) {
         this.$q.notify({
           type: 'negative',
