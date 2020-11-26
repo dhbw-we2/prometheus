@@ -10,11 +10,11 @@
         <q-card class="my-card">
           <div class="calendarCard" style="max-width: 1650px; width: 100%;">
             <div class="row justify-center items-center">
-              <q-btn flat label="Prev" @click="calendarPrev" />
-              <q-separator vertical />
-              <q-btn flat label="Next" @click="calendarNext" />
+              <q-btn flat label="Prev" @click="calendarPrev"/>
+              <q-separator vertical/>
+              <q-btn flat label="Next" @click="calendarNext"/>
             </div>
-            <q-separator />
+            <q-separator/>
             <div style="overflow: hidden">
               <q-calendar
                 ref="calendar"
@@ -56,74 +56,71 @@
       <div class="columnRight">
         <div class="flex-center justify-start">
           <div class="text-white">
-            <h4>Einladungen</h4>
+            <h4>Mein nächstes Event</h4>
           </div>
+          <div v-if="this.events.length > 0" class="col q-pb-md">
+            <q-card class="my-card">
+              <q-card-section>
+                <div class="row items-center no-wrap">
+                  <div class="col">
+                    <div class="text-h5">{{ events[0].Name }}</div>
+                    <div class="text-subtitle2 q-pa-sm">erstellt von: {{ events[0].Creator }}</div>
+                  </div>
 
-          <q-list bordered class="rounded-borders" style="max-width: 700px; background-color: white">
-            <q-item-label header>Ausstehende Einladungen</q-item-label>
-
-            <q-item>
-              <q-item-section avatar top>
-                <q-icon name="people" color="black" size="34px" />
-              </q-item-section>
-
-              <q-item-section top class="col-2 gt-sm">
-                <q-item-label class="q-mt-sm">Party bei Janis</q-item-label>
-              </q-item-section>
-
-              <q-item-section top>
-                <q-item-label lines="1">
-                  <span class="text-grey-8">Party bei Janis</span>
-                </q-item-label>
-                <q-item-label caption lines="1">
-                    @rstoenescu in #1: > The build system
-                </q-item-label>
-                <q-item-label lines="1" class="q-mt-xs text-body2 text-weight-bold text-primary text-uppercase">
-                  <span class="cursor-pointer">Einladung öffnen</span>
-                </q-item-label>
-              </q-item-section>
-
-              <q-item-section top side>
-                <div class="text-grey-8 q-gutter-xs">
-                  <q-btn class="gt-xs" size="12px" flat dense round icon="done" />
-                  <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />
                 </div>
-              </q-item-section>
-            </q-item>
+              </q-card-section>
+              <q-card-section class="q-pt-none">
+                <q-list>
+                  <q-item>
+                    <q-item-section avatar>
+                      <q-icon color="dark" name="place"/>
+                    </q-item-section>
 
-            <q-separator spaced />
+                    <q-item-section>
+                      <q-item-label>Wo</q-item-label>
+                      <q-item-label caption>{{ events[0].Location }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                  <q-item>
+                    <q-item-section avatar>
+                      <q-icon color="dark" name="today"/>
+                    </q-item-section>
 
-            <q-item>
-              <q-item-section avatar top>
-                <q-icon name="people" color="black" size="34px" />
-              </q-item-section>
-
-              <q-item-section top class="col-2 gt-sm">
-                <q-item-label class="q-mt-sm">GitHub</q-item-label>
-              </q-item-section>
-
-              <q-item-section top>
-                <q-item-label lines="1">
-                  <span class="text-grey-8">Raclette bei Toni</span>
-                </q-item-label>
-                <q-item-label caption lines="1">
-                  @rstoenescu in #1: > The build system
-                </q-item-label>
-                <q-item-label lines="1" class="q-mt-xs text-body2 text-weight-bold text-primary text-uppercase">
-                  <span class="cursor-pointer">Einladung öffnen</span>
-                </q-item-label>
-              </q-item-section>
-
-              <q-item-section top side>
-                <div class="text-grey-8 q-gutter-xs">
-                  <q-btn class="gt-xs" size="12px" flat dense round icon="done" />
-                  <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />
-                </div>
-              </q-item-section>
-            </q-item>
-          </q-list>
+                    <q-item-section>
+                      <q-item-label>Wann</q-item-label>
+                      <q-item-label caption>{{ events[0].DateTime | dateToString }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-card-section>
+              <q-card-section>
+                <q-expansion-item
+                  expand-separator
+                  icon="list"
+                  label="Zutaten die ich mitbringe"
+                  :caption="events[0].ItemsFinished"
+                >
+                  <q-card>
+                    <q-list>
+                      <q-item
+                        v-for="item in events[0].LoadedItems">
+                        <q-item-section avatar>
+                          <q-avatar size="28px">
+                            <img :src="item.Creator.profilePhoto">
+                          </q-avatar>
+                        </q-item-section>
+                        <q-item-section>
+                          <q-item-label>{{ item.Name }}</q-item-label>
+                          <q-item-label caption>{{ item.Amount }}</q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-card>
+                </q-expansion-item>
+              </q-card-section>
+            </q-card>
+          </div>
         </div>
-
       </div>
     </div>
 
@@ -132,10 +129,17 @@
 </template>
 
 <script>
+import {date} from "quasar";
+import firebase from 'firebase/app';
+import {QSpinnerGears} from 'quasar';
+import {getAllGroupsOfUser, getEventsOfGroups} from "src/js/global.js";
+
 export default {
-  data () {
+  data() {
     return {
       selectedDate: '',
+      userItems: [],
+      events: [],
       agenda: {
         // value represents day of the week
         1: [
@@ -254,17 +258,187 @@ export default {
       }
     }
   },
-
+  filters:{
+    dateToString(timestamp){
+      let timestampInMs = timestamp.seconds * 1000
+      return date.formatDate(timestampInMs, "DD.MM.YYYY HH:mm") + " Uhr"
+    }
+  },
   methods: {
-    getAgenda (day) {
+
+    async getDataWithLoading() {
+      this.$q.loading.show({
+        message: 'Deine Daten werden geladen...',
+        backgroundColor: 'grey',
+        spinner: QSpinnerGears,
+        customClass: 'loader'
+      })
+      try {
+        await this.getCalendarData()
+        await this.getItems()
+
+      } catch (err) {
+        console.error(err)
+        this.$q.notify({
+          message: "Ein Fehler ist aufgetreten: ${err}",
+          color: 'negative'
+        })
+      } finally {
+        this.$q.loading.hide()
+      }
+    },
+    async getItems() {
+      let userId = this.$fb.auth().currentUser.uid
+      let items = await this.getItemsOfUser(userId);
+      this.userItems = items;
+    },
+    async getItemsOfUser(userId) {
+      let data = [];
+      let userRef = this.$firestore.collection("users").doc(userId);
+      await this.$firestore.collection("Items").where("Shopper", "==", userRef).get()
+        .then(function (querySnapshot) {
+          querySnapshot.forEach(function (doc) {
+            data.push(doc.data());
+          });
+        });
+      return data;
+    },
+    async getCalendarData() {
+      let userId = this.$fb.auth().currentUser.uid
+      let groups = await getAllGroupsOfUser(userId);
+      let events = await getEventsOfGroups(groups);
+
+      if(events.length > 0)
+      {
+        await this.loadEventData(events[0]);
+      }
+
+      this.events = events;
+
+    },
+
+    async loadEventData(event) {
+      await this.loadAllItemsOfEvent(event)
+      await this.loadCreatorOfEvent(event)
+      await this.loadAllParticipantsOfEvent(event)
+    },
+    async loadAllParticipantsOfEvent(event) {
+      event.Participants = []
+      let groupID = event.Group.id
+      let groupRef = await this.$firestore.collection("Groups").doc(groupID).get();
+      let group = groupRef.data();
+      for (let userRefs of group.Users){
+        let userRef = await this.getUserRefByUserId(userRefs.id)
+        let user = userRef.data()
+        event.Participants.push(user)
+      }
+    },
+
+    async loadAllItemsOfEvent(event) {
+
+      event.LoadedItems = []
+      event.ItemsFinished = ""
+      let currentUser = this.$fb.auth().currentUser.uid
+      for (let itemIndex in event.Items)
+      {
+        try {
+          let item = await this.getItemData(event.Items[itemIndex])
+
+          if(item.Shopper.id === currentUser)
+          {
+            event.LoadedItems.push(await this.getItemData(event.Items[itemIndex]))
+          }
+        }catch (error){
+          console.warn("Could not load item " + event.Items[itemIndex].id + "! \n " +
+            "Maybe item got deleted but reference in the event is still pointing on it")
+        }
+      }
+    },
+
+    async loadCreatorOfEvent(event) {
+      if (event.Creator){
+        let creatorRef = await this.getUserRefByUserId(event.Creator.id)
+        let creator = creatorRef.data()
+        if(creator){
+          event.Creator = creator.fullName
+        }else{
+          event.Creator = ""
+        }
+      }
+    },
+    async getItemDataById(itemID) {
+      let newItem = await this.getItemByItemId(itemID)
+      newItem.Id = itemID
+      let creatorRef = await this.getUserRefByUserId(newItem.Creator.id)
+      newItem.Creator = creatorRef.data()
+      let shopper
+      try{
+        let shopperRef = await this.getUserRefByUserId(newItem.Shopper.id)
+        shopper = shopperRef.data()
+      }catch (error){
+        shopper = ""
+      }
+      newItem.Shopper = shopper
+      return newItem
+    },
+
+    async getItemData(item) {
+      let newItem = await this.getItemByItemId(item.id)
+      newItem.Id = item.id
+      let creatorRef = await this.getUserRefByUserId(newItem.Creator.id)
+      newItem.Creator = creatorRef.data()
+      let shopper
+      try{
+        let shopperRef = await this.getUserRefByUserId(newItem.Shopper.id)
+        shopper = shopperRef.data()
+      }catch (error){
+        shopper = ""
+      }
+      newItem.Shopper = shopper
+      return newItem
+    },
+    async getItemByItemId(itemId) {
+      let docRef = this.$firestore.collection("Items").doc(itemId);
+      var returnValue
+      await docRef.get().then(function(doc) {
+        if (doc.exists) {
+          returnValue = doc.data()
+        }
+      }).catch(function(error) {
+        console.log("Error getting item:", error);
+      });
+      return returnValue;
+    },
+    async getUserRefByUserId(userId) {
+      let docRef = this.$firestore.collection("users").doc(userId);
+      var returnValue
+      await docRef.get().then(function(doc) {
+        if (doc.exists) {
+          returnValue = doc
+        }
+      }).catch(function(error) {
+        console.log("Error getting user:", error);
+      });
+      return returnValue;
+    },
+
+    getEventsOfDay(day) {
+
+    },
+
+
+    getAgenda(day) {
       return this.agenda[parseInt(day.weekday, 10)]
     },
-    calendarNext () {
+    calendarNext() {
       this.$refs.calendar.next()
     },
-    calendarPrev () {
+    calendarPrev() {
       this.$refs.calendar.prev()
     }
+  },
+  async created() {
+    await this.getDataWithLoading();
   }
 }
 </script>
@@ -276,6 +450,7 @@ export default {
   width: 45%;
   padding: 10px;
 }
+
 .columnRight {
   float: left;
   width: 40%;
@@ -294,7 +469,8 @@ export default {
   .columnLeft {
     width: 100%;
   }
-  .columnRight{
+
+  .columnRight {
     width: 100%;
   }
 }
