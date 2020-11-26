@@ -4,7 +4,7 @@
       <div class="columnLeft" style="margin-left: 5px; margin-right: 5px;">
         <div class="flex-center justify-start">
           <div class="col text-white">
-            <h4>Meine Anstehenden Events</h4>
+            <h4>Anstehende Events</h4>
           </div>
         </div>
         <q-card class="my-card">
@@ -56,10 +56,10 @@
       <div class="columnRight">
         <div class="flex-center justify-start">
           <div class="text-white">
-            <h4>Mein nächstes Event</h4>
+            <h4>Nächstes Event</h4>
           </div>
           <div v-if="this.events.length > 0" class="col q-pb-md">
-            <q-card class="my-card">
+            <q-card class="my-card" style="width: 100%;">
               <q-card-section>
                 <div class="row items-center no-wrap">
                   <div class="col">
@@ -447,13 +447,13 @@ export default {
 /* Create two equal columns that floats next to each other */
 .columnLeft {
   float: left;
-  width: 45%;
+  width: 60%;
   padding: 10px;
 }
 
 .columnRight {
   float: left;
-  width: 40%;
+  width: 37%;
   padding: 10px;
 }
 
@@ -465,7 +465,7 @@ export default {
 }
 
 /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 800px) {
   .columnLeft {
     width: 100%;
   }
