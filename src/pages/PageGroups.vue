@@ -7,25 +7,28 @@
             <div class="col text-white">
               <h4>Meine Gruppen</h4>
             </div>
-            <div class="col">
+            <div class="col" v-if="$q.screen.gt.xs">
               <q-btn color="positive" class="float-right" icon="add" label="Neue Gruppe erstellen" @click="newGroupPrompt = true"/>
-              <q-dialog v-model="newGroupPrompt" persistent>
-                <q-card style="min-width: 350px">
-                  <q-card-section>
-                    <div class="text-h6">Neue Gruppe erstellen</div>
-                  </q-card-section>
-
-                  <q-card-section class="q-pt-none">
-                    <q-input label="Gib deiner Gruppe einen Namen" v-model="newGroupName" autofocus  />
-                  </q-card-section>
-
-                  <q-card-actions align="right" class="text-primary">
-                    <q-btn flat label="Abbrechen" v-close-popup />
-                    <q-btn flat color="positive" label="Erstellen" @click="createNewGroup" />
-                  </q-card-actions>
-                </q-card>
-              </q-dialog>
             </div>
+            <div class="col" v-else>
+              <q-btn color="positive" class="float-right" icon="add" @click="newGroupPrompt = true"/>
+            </div>
+            <q-dialog v-model="newGroupPrompt" persistent>
+              <q-card style="min-width: 350px">
+                <q-card-section>
+                  <div class="text-h6">Neue Gruppe erstellen</div>
+                </q-card-section>
+
+                <q-card-section class="q-pt-none">
+                  <q-input label="Gib deiner Gruppe einen Namen" v-model="newGroupName" autofocus  />
+                </q-card-section>
+
+                <q-card-actions align="right" class="text-primary">
+                  <q-btn flat label="Abbrechen" v-close-popup />
+                  <q-btn flat color="positive" label="Erstellen" @click="createNewGroup" />
+                </q-card-actions>
+              </q-card>
+            </q-dialog>
           </div>
           <div class="row"
                v-for="group in groups"
@@ -42,7 +45,21 @@
                         <q-menu cover>
                           <q-list>
                             <q-item clickable>
-                              <q-item-section @click="leaveGroup(group)">Gruppe verlassen</q-item-section>
+                              <q-item-section @click="leaveGroupPopup = true">Gruppe verlassen</q-item-section>
+                              <q-dialog v-model="leaveGroupPopup" persistent>
+                                <q-card style="min-width: 350px">
+                                  <q-card-section>
+                                    <div class="text-h6">Willst du die Gruppe <strong>"{{ group.Name }}"</strong> wirklich verlassen?</div>
+                                  </q-card-section>
+                                  <q-card-section>
+                                    <div class="text-body1">Falls du die Gruppe verlässt, verlierst du auch den Zugriff auf alle Events der Gruppe.</div>
+                                  </q-card-section>
+                                  <q-card-actions align="right" class="text-primary">
+                                    <q-btn color="negative" flat label="Abbrechen" @click="leaveGroupPopup = false" />
+                                    <q-btn color="positive" flat label="Verlassen" @click="leaveGroup(group); leaveGroupPopup = false"/>
+                                  </q-card-actions>
+                                </q-card>
+                              </q-dialog>
                             </q-item>
                             <q-item v-if="isAdminUser(group.Admins)" clickable>
                               <q-item-section @click="addUserPrompt = true">Freund hinzufügen</q-item-section>
@@ -92,8 +109,23 @@
                                 <q-item v-if="!isLoggedInUser(user.id) && isAdminUser(group.Admins, user.id)" clickable v-close-popup>
                                   <q-item-section @click="removeFromAdminList(group, user.id)">Admin-Rolle entfernen</q-item-section>
                                 </q-item>
-                                <q-item v-if="!isLoggedInUser(user.id)" clickable v-close-popup>
-                                  <q-item-section @click="leaveGroup(group, user.id)">Aus der Gruppe entfernen</q-item-section>
+                                <q-item v-if="!isLoggedInUser(user.id)" clickable>
+                                  <q-item-section @click="kickUserPopup = true">Aus der Gruppe entfernen</q-item-section>
+                                  <q-dialog v-model="kickUserPopup" persistent>
+                                    <q-card style="min-width: 350px">
+                                      <q-card-section>
+                                        <div class="text-h6">Willst du <strong>"{{ user.fullName }}"</strong> wirklich aus der Gruppe</div>
+                                        <div class="text-h6"><strong>"{{ group.Name }}"</strong> entfernen?</div>
+                                      </q-card-section>
+                                      <q-card-section>
+                                        <div class="text-body1">Wenn du <strong>{{user.fullName}}</strong> aus der Gruppe entfernst, hat er/sie keinen Zugriff mehr auf die Events der Gruppe</div>
+                                      </q-card-section>
+                                      <q-card-actions align="right" class="text-primary">
+                                        <q-btn color="negative" flat label="Abbrechen" @click="kickUserPopup = false" />
+                                        <q-btn color="positive" flat label="Entfernen" @click="leaveGroup(group, user.id); kickUserPopup = false"/>
+                                      </q-card-actions>
+                                    </q-card>
+                                  </q-dialog>
                                 </q-item>
                               </q-list>
                             </q-menu>
@@ -138,7 +170,9 @@ export default {
       newGroupPrompt: false,
       newGroupName: "",
       addUserPrompt: false,
-      addUserUsername: ""
+      addUserUsername: "",
+      leaveGroupPopup: false,
+      kickUserPopup: false
     }
   },
   filters:{
@@ -264,7 +298,6 @@ export default {
         this.$firestore.collection("Groups").add({
           Name: this.newGroupName,
           Created: timeCreated,
-          Creator: userRef,
           Users: [userRef],
           Admins: [userRef]
         })
@@ -379,6 +412,7 @@ export default {
           message: 'Kein Nutzer mit diesem Nutzername gefunden.'
         })
         this.addUserPrompt = false;
+        this.addUserUsername = "";
         return;
       }
       let groupData = await this.$firestore.collection("Groups").doc(groupId).get()
@@ -392,6 +426,7 @@ export default {
         console.log("Updated succesfully")
       })
       this.addUserPrompt = false;
+      this.addUserUsername = "";
       await this.getGroupsWithLoading()
     },
   },

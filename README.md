@@ -1,19 +1,11 @@
 # RaclettOrg
-A web application to plan raclette evenings with friends, developed during the lecture "Web Engineering 2".
+RaclettOrg ist **die** Webanwendung zur Planung und Verwaltung deines nächsten Raclette-Abends. Ganz einfach Gruppen bilden, Freunde zu den Gruppen hinzufügen und Events mit ihnen planen. Um nichts zu vergessen oder wegschmeißen zu müssen, kann jeder Teilnehmer hinzufügen, was er gerne esse würde und angeben was er mitbringt. Damit kannst du sicherstellen, dass nicht jeder Mais mitbringt, aber niemand Zwiebeln. Denn NACHHALTIGKEIT wird bei uns groß geschrieben.
 
-Funktionalities: 
-* Usermanagement with Login.
-* Possibility to group up with others.
-* Create events in the group to meet and eat raclette.
-* Possibility to manage who brings what and what everybody wants to eat.
-* Database to manage the ingredient and even who brings how much of what.
-
-
-Target audience: 
-* Raclette-Fans
-
-Using benefit: 
-* Central tool to manage your raclette evenings.
-* Usable in the browser and therefore platform independent.
-* intuitive user intuitive user interface.
-* Avoiding of too much ingredients and preventing the waste of food.
+Funktionalität:
+* Usermanagement (Profilbild, Nutzername etc.) mit Login und Registrierung
+* Möglichkeit Gruppen zu erstellen und Nutzer über ihren Nutzernamen hinzuzufügen
+* Als Gruppe Events erstellen um den Raclette-Abend zu planen
+* Wunschzutaten zu Events hinzufügen
+* Eintragen, welche Zutaten man mitbringt
+* Einsicht, wer was mitbringt und ob etwas fehlt
+* Wichtigste Infos auf der Startseite --> Kalender, Infos zum nächsten Event
