@@ -7,8 +7,11 @@
             <div class="col text-white">
               <h4>Kommende Events</h4>
             </div>
-            <div class="col">
+            <div class="col" v-if="$q.screen.gt.xs">
               <q-btn color="positive" class="float-right" icon="add" label="Neues Event erstellen" @click="newEventPopup = true"/>
+            </div>
+            <div class="col" v-else>
+              <q-btn color="positive" class="float-right" icon="add" @click="newEventPopup = true"/>
             </div>
           </div>
           <q-dialog v-model="newEventPopup" persistent>
