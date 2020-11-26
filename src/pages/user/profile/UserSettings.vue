@@ -27,9 +27,6 @@
         <div class="row justify-between items-center q-mb-lg"><label class="col-3" for="email">Email</label>
           <q-input class="col" id="email" v-model="email" borderless="borderless" dense="dense" type="text"></q-input>
         </div>
-        <div class="row justify-between items-center q-mb-lg"><label class="col-3" for="mobile">Mobile</label>
-          <q-input class="col" id="mobile" v-model="mobile" borderless="borderless" dense="dense" hint="+1(###) ###-####" mask="+#(###) ###-####" type="text"></q-input>
-        </div>
       </section>
       <div class="row justify-between q-my-lg q-px-md absolute-bottom">
         <q-btn color="primary" label="CANCEL" style="min-width:6em;" @click="setEditUserDialog(false)"></q-btn>
@@ -62,7 +59,7 @@ export default {
     return {
       email: state.email,
       fullName: state.fullName,
-      mobile: state.mobile,
+      mobile: '',
       photoType: '',
       photoUpload: false
     }
