@@ -62,13 +62,13 @@
               <div class="text-white">
                 <h4>Nächstes Event</h4>
               </div>
-              <div v-if="this.events.length > 0" class="col q-pb-md">
+              <div v-if="dataReady" class="col q-pb-md">
                 <q-card class="my-card">
                   <q-card-section>
                     <div class="row items-center no-wrap">
                       <div class="col">
-                        <div class="text-h5">{{ events[0].Name }}</div>
-                        <div class="text-subtitle2 q-pa-sm">erstellt von: {{ events[0].Creator }}</div>
+                        <div class="text-h5">{{ events[nextEventIndex].Name }}</div>
+                        <div class="text-subtitle2 q-pa-sm">erstellt von: {{ events[nextEventIndex].Creator }}</div>
                       </div>
 
                     </div>
@@ -82,7 +82,7 @@
 
                         <q-item-section>
                           <q-item-label>Wo</q-item-label>
-                          <q-item-label caption>{{ events[0].Location }}</q-item-label>
+                          <q-item-label caption>{{ events[nextEventIndex].Location }}</q-item-label>
                         </q-item-section>
                       </q-item>
                       <q-item>
@@ -92,7 +92,7 @@
 
                         <q-item-section>
                           <q-item-label>Wann</q-item-label>
-                          <q-item-label caption>{{ events[0].DateTime | dateToString }}</q-item-label>
+                          <q-item-label caption>{{ events[nextEventIndex].DateTime | dateToString }}</q-item-label>
                         </q-item-section>
                       </q-item>
                     </q-list>
@@ -102,12 +102,12 @@
                       expand-separator
                       icon="list"
                       label="Zutaten die ich mitbringe"
-                      :caption="events[0].ItemsFinished"
+                      :caption="events[nextEventIndex].ItemsFinished"
                     >
                       <q-card>
                         <q-list>
                           <q-item
-                            v-for="item in events[0].LoadedItems">
+                            v-for="item in events[nextEventIndex].LoadedItems">
                             <q-item-section avatar>
                               <q-avatar size="28px">
                                 <img :src="item.Creator.profilePhoto">
@@ -144,9 +144,9 @@ export default {
     return {
       selectedDate: '',
       padding: '',
-      userItems: [],
       events: [],
-
+      nextEventIndex: 0,
+      dataReady: false
     }
   },
   filters: {
@@ -165,8 +165,8 @@ export default {
         customClass: 'loader'
       })
       try {
+
         await this.getCalendarData()
-        await this.getItems()
 
       } catch (err) {
         console.error(err)
@@ -177,11 +177,6 @@ export default {
       } finally {
         this.$q.loading.hide()
       }
-    },
-    async getItems() {
-      let userId = this.$fb.auth().currentUser.uid
-      let items = await this.getItemsOfUser(userId);
-      this.userItems = items;
     },
     async getItemsOfUser(userId) {
       let data = [];
@@ -199,15 +194,24 @@ export default {
       let groups = await getAllGroupsOfUser(userId);
       let events = await getEventsOfGroups(groups);
 
-      for (let event in events) {
-        if (event != 0) {
-          this.loadCreatorOfEvent(events[event]);
+      if(events.length > 0)
+      {
+        let nextEventLoaded = false
+        for(let event in events)
+        {
+          if( (Date.now() < (events[event].DateTime.seconds * 1000) ) && !nextEventLoaded)
+          {
+            this.nextEventIndex = event;
+            await this.loadEventData(events[event]);
+            nextEventLoaded = true
+          }else{
+            await this.loadCreatorOfEvent(events[event]);
+          }
         }
       }
-      if (events.length > 0) {
-        await this.loadEventData(events[0]);
-      }
+
       this.events = events;
+      this.dataReady = true;
     },
 
     async loadEventData(event) {
@@ -228,7 +232,6 @@ export default {
     },
 
     async loadAllItemsOfEvent(event) {
-
       event.LoadedItems = []
       event.ItemsFinished = ""
       let currentUser = this.$fb.auth().currentUser.uid
@@ -318,8 +321,7 @@ export default {
     getEventsOfDay(day) {
 
     },
-
-
+    
     getAgenda(day) {
       let eventsOfDay = [];
       let dateOfDay = new Date(day.date)
