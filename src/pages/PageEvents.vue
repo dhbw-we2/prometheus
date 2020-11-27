@@ -5,7 +5,7 @@
         <div class="col col-12 offset-0 col-md-8 offset-md-2">
           <div class="row flex-center justify-start">
             <div class="col text-white">
-              <h4>Kommende Events</h4>
+              <h4>Alle Events von dir</h4>
             </div>
             <div class="col" v-if="$q.screen.gt.xs">
               <q-btn color="positive" class="float-right" icon="add" label="Neues Event erstellen" @click="newEventPopup = true"/>
@@ -70,6 +70,21 @@
               </q-card-actions>
             </q-card>
           </q-dialog>
+          <q-dialog v-model="deleteEventPopup" persistent>
+            <q-card style="min-width: 350px">
+              <q-card-section>
+                <div class="text-h6">Willst du das Event <strong>"{{ deleteEventName }}"</strong> wirklich löschen?</div>
+              </q-card-section>
+              <q-card-section>
+                <div class="text-body1">Falls du die Gruppe verlässt, verlierst du auch den Zugriff auf alle Events der Gruppe.</div>
+              </q-card-section>
+              <q-card-actions align="right" class="text-primary">
+                <q-btn color="negative" flat label="Abbrechen" @click="deleteEventPopup = false" />
+                <q-btn color="positive" flat label="Löschen" @click="deleteEvent()"/>
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
+
           <div class="row"
                v-for="event in Events">
             <div class="col q-pb-md">
@@ -85,10 +100,7 @@
                         <q-menu cover auto-close>
                           <q-list>
                             <q-item clickable>
-                              <q-item-section>Event verlassen</q-item-section>
-                            </q-item>
-                            <q-item clickable>
-                              <q-item-section>Freund einladen</q-item-section>
+                              <q-item-section @click="showDeleteEvent(event)">Event löschen</q-item-section>
                             </q-item>
                           </q-list>
                         </q-menu>
@@ -220,6 +232,10 @@ export default {
       deleteItemName: '',
       deleteItemAmount: '',
       deleteItemCreator: '',
+      deleteEventPopup: false,
+      deleteEventName: '',
+      deleteEventId: '',
+      allGroupNamesLoaded: false
     }
   },
   filters:{
@@ -271,9 +287,12 @@ export default {
     },
 
     async loadNameOfGroups(groups) {
-      for (let group of groups)
-      {
-        this.groups.push(group.data().Name)
+      if(!this.allGroupNamesLoaded){
+        for (let group of groups)
+        {
+          this.groups.push(group.data().Name)
+        }
+        this.allGroupNamesLoaded = true
       }
     },
 
@@ -297,7 +316,7 @@ export default {
           allEvents.push(data)
         }
       }
-      return allEvents.sort(function (a, b){return a.DateTime - b.DateTime})
+      return allEvents.sort(function (a, b){return b.DateTime - a.DateTime})
     },
 
     async loadDataOfEvents(eventsToLoad) {
@@ -445,13 +464,16 @@ export default {
         let groupRef = this.$firestore.collection("Groups").doc(groupId);
         if(this.newEventName == ""){ throw "Empty event name"};
         if(this.newEventLocation == ""){ throw "Empty location"};
-        this.$firestore.collection("Events").add({
+        let newEvRef = await this.$firestore.collection("Events").add({
           Name: this.newEventName,
           Location: this.newEventLocation,
           DateTime: dateTime,
           Creator: userRef,
           Group: groupRef
         })
+        this.Events = []
+        await this.loadData();
+
       }catch (error){
         alert("Bitte fülle alle Felder aus.")
         return;
@@ -631,8 +653,40 @@ export default {
         event.ItemsFinished = "Noch nicht alle Zutaten werden mitgebracht!"
         event.ItemsFinishedIcon = "rule"
       }
+    },
+
+    showDeleteEvent(event){
+      this.deleteEventName = event.Name
+      this.deleteEventId = event.id
+      this.deleteEventPopup = true
+    },
+
+    async deleteEvent(){
+      let eventRef = await this.$firestore.collection("Events").doc(this.deleteEventId).get()
+      let eventData = await eventRef.data()
+      if(eventData.Items){
+        for(let item of eventData.Items){
+          this.$firestore.collection("Items").doc(item.id).delete().catch(function(error){
+            console.warn("Firebase Access Error: Could not delete Item with Id: ", item.id, error)
+          })
+        }
+      }
+
+      this.$firestore.collection("Events").doc(this.deleteEventId).delete().catch(function(error){
+        console.warn("Firebase Access Error: Could not delete Event with Id: ", this.deleteEventId, error)
+      })
+      for(let eventIndex in this.Events){
+        if(this.Events[eventIndex].id == this.deleteEventId){
+          this.Events.splice(eventIndex, 1);
+          break;
+        }
+      }
+      this.deleteEventPopup = false
+      this.deleteEventName = ""
+      this.deleteEventId = ""
     }
   },
+
   created() {
     this.loadData();
   }
