@@ -1,130 +1,133 @@
 <template>
   <q-page class="flex-center bg-negative">
-    <div class="row">
-      <div class="columnLeft" style="margin-left: 5px; margin-right: 5px;">
-        <div class="flex-center justify-start">
-          <div class="col text-white">
-            <h4>Anstehende Events</h4>
-          </div>
-        </div>
-        <q-card class="my-card">
-          <div class="calendarCard" style="max-width: 1650px; width: 100%;">
-            <div class="row justify-center items-center">
-              <q-btn flat label="Prev" @click="calendarPrev"/>
-              <q-separator vertical/>
-              <q-btn flat label="Next" @click="calendarNext"/>
+    <div class="q-pa-md">
+      <div class="row">
+        <div class="col col-12 offset-md-1 col-md-6">
+            <div class="flex-center justify-start">
+              <div class="col text-white">
+                <h4>Anstehende Events</h4>
+              </div>
             </div>
-            <q-separator/>
-            <div style="overflow: hidden">
-              <q-calendar
-                ref="calendar"
-                v-model="selectedDate"
-                view="week-agenda"
-                animated
-                transition-prev="slide-right"
-                transition-next="slide-left"
-                locale="en-us"
-                style="height: 400px;"
-              >
-                <template #day-body="{ timestamp }">
-                  <template v-for="(agenda) in getAgenda(timestamp)">
-                    <div
-                      :key="timestamp.date + agenda.time"
-                      :label="agenda.time"
-                      class="justify-start q-ma-sm shadow-5 bg-grey-6"
-                    >
-                      <div v-if="agenda.avatar" class="row justify-center" style="margin-top: 30px; width: 100%;">
-                        <q-avatar style="margin-top: -25px; margin-bottom: 10px; font-size: 60px; max-height: 50px;">
-                          <img :src="agenda.avatar" style="border: #9e9e9e solid 5px;">
-                        </q-avatar>
-                      </div>
-                      <div class="col-12 q-px-sm">
-                        <strong>{{ agenda.time }}</strong>
-                      </div>
-                      <div v-if="agenda.desc" class="col-12 q-px-sm" style="font-size: 10px;">
-                        {{ agenda.desc }}
-                      </div>
-                    </div>
-                  </template>
-                </template>
-              </q-calendar>
-            </div>
-          </div>
-        </q-card>
-      </div>
-
-      <div class="columnRight">
-        <div class="flex-center justify-start">
-          <div class="text-white">
-            <h4>Nächstes Event</h4>
-          </div>
-          <div v-if="this.events.length > 0" class="col q-pb-md">
-            <q-card class="my-card" style="width: 100%;">
-              <q-card-section>
-                <div class="row items-center no-wrap">
-                  <div class="col">
-                    <div class="text-h5">{{ events[0].Name }}</div>
-                    <div class="text-subtitle2 q-pa-sm">erstellt von: {{ events[0].Creator }}</div>
-                  </div>
-
+            <q-card>
+              <div class="calendarCard">
+                <div class="row justify-center items-center">
+                  <q-btn flat label="Prev" @click="calendarPrev"/>
+                  <q-separator vertical/>
+                  <q-btn flat label="Next" @click="calendarNext"/>
                 </div>
-              </q-card-section>
-              <q-card-section class="q-pt-none">
-                <q-list>
-                  <q-item>
-                    <q-item-section avatar>
-                      <q-icon color="dark" name="place"/>
-                    </q-item-section>
+                <q-separator/>
+                <div style="overflow: hidden">
+                  <q-calendar
+                    ref="calendar"
+                    v-model="selectedDate"
+                    view="week-agenda"
+                    animated
+                    transition-prev="slide-right"
+                    transition-next="slide-left"
+                    locale="en-us"
+                    style="height: 400px;"
+                  >
+                    <template #day-body="{ timestamp }">
+                      <template v-for="(agenda) in getAgenda(timestamp)">
+                        <div
+                          :key="timestamp.date + agenda.time"
+                          :label="agenda.time"
+                          class="justify-start q-ma-sm shadow-5 bg-grey-6"
+                        >
+                          <div v-if="agenda.avatar" class="row justify-center" style="margin-top: 30px; width: 100%;">
+                            <q-avatar
+                              style="margin-top: -25px; margin-bottom: 10px; font-size: 60px; max-height: 50px;">
+                              <img :src="agenda.avatar" style="border: #9e9e9e solid 5px;">
+                            </q-avatar>
+                          </div>
+                          <div class="col-12 q-px-sm">
+                            <strong>{{ agenda.time }}</strong>
+                          </div>
+                          <div v-if="agenda.desc" class="col-12 q-px-sm" style="font-size: 10px;">
+                            {{ agenda.desc }}
+                          </div>
+                        </div>
+                      </template>
+                    </template>
+                  </q-calendar>
+                </div>
+              </div>
+            </q-card>
+          </div>
 
-                    <q-item-section>
-                      <q-item-label>Wo</q-item-label>
-                      <q-item-label caption>{{ events[0].Location }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                  <q-item>
-                    <q-item-section avatar>
-                      <q-icon color="dark" name="today"/>
-                    </q-item-section>
+          <div class="col col-12 col-md-4">
+            <div :class="padding">
+            <div class="flex-center justify-start">
+              <div class="text-white">
+                <h4>Nächstes Event</h4>
+              </div>
+              <div v-if="this.events.length > 0" class="col q-pb-md">
+                <q-card class="my-card" style="width: 100%;">
+                  <q-card-section>
+                    <div class="row items-center no-wrap">
+                      <div class="col">
+                        <div class="text-h5">{{ events[0].Name }}</div>
+                        <div class="text-subtitle2 q-pa-sm">erstellt von: {{ events[0].Creator }}</div>
+                      </div>
 
-                    <q-item-section>
-                      <q-item-label>Wann</q-item-label>
-                      <q-item-label caption>{{ events[0].DateTime | dateToString }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-card-section>
-              <q-card-section>
-                <q-expansion-item
-                  expand-separator
-                  icon="list"
-                  label="Zutaten die ich mitbringe"
-                  :caption="events[0].ItemsFinished"
-                >
-                  <q-card>
+                    </div>
+                  </q-card-section>
+                  <q-card-section class="q-pt-none">
                     <q-list>
-                      <q-item
-                        v-for="item in events[0].LoadedItems">
+                      <q-item>
                         <q-item-section avatar>
-                          <q-avatar size="28px">
-                            <img :src="item.Creator.profilePhoto">
-                          </q-avatar>
+                          <q-icon color="dark" name="place"/>
                         </q-item-section>
+
                         <q-item-section>
-                          <q-item-label>{{ item.Name }}</q-item-label>
-                          <q-item-label caption>{{ item.Amount }}</q-item-label>
+                          <q-item-label>Wo</q-item-label>
+                          <q-item-label caption>{{ events[0].Location }}</q-item-label>
+                        </q-item-section>
+                      </q-item>
+                      <q-item>
+                        <q-item-section avatar>
+                          <q-icon color="dark" name="today"/>
+                        </q-item-section>
+
+                        <q-item-section>
+                          <q-item-label>Wann</q-item-label>
+                          <q-item-label caption>{{ events[0].DateTime | dateToString }}</q-item-label>
                         </q-item-section>
                       </q-item>
                     </q-list>
-                  </q-card>
-                </q-expansion-item>
-              </q-card-section>
-            </q-card>
+                  </q-card-section>
+                  <q-card-section>
+                    <q-expansion-item
+                      expand-separator
+                      icon="list"
+                      label="Zutaten die ich mitbringe"
+                      :caption="events[0].ItemsFinished"
+                    >
+                      <q-card>
+                        <q-list>
+                          <q-item
+                            v-for="item in events[0].LoadedItems">
+                            <q-item-section avatar>
+                              <q-avatar size="28px">
+                                <img :src="item.Creator.profilePhoto">
+                              </q-avatar>
+                            </q-item-section>
+                            <q-item-section>
+                              <q-item-label>{{ item.Name }}</q-item-label>
+                              <q-item-label caption>{{ item.Amount }}</q-item-label>
+                            </q-item-section>
+                          </q-item>
+                        </q-list>
+                      </q-card>
+                    </q-expansion-item>
+                  </q-card-section>
+                </q-card>
+              </div>
+            </div>
+            </div>
+          </div>
           </div>
         </div>
-      </div>
-    </div>
-
-
   </q-page>
 </template>
 
@@ -138,6 +141,7 @@ export default {
   data() {
     return {
       selectedDate: '',
+      padding: '',
       userItems: [],
       events: [],
       agenda: {
@@ -258,8 +262,8 @@ export default {
       }
     }
   },
-  filters:{
-    dateToString(timestamp){
+  filters: {
+    dateToString(timestamp) {
       let timestampInMs = timestamp.seconds * 1000
       return date.formatDate(timestampInMs, "DD.MM.YYYY HH:mm") + " Uhr"
     }
@@ -308,8 +312,7 @@ export default {
       let groups = await getAllGroupsOfUser(userId);
       let events = await getEventsOfGroups(groups);
 
-      if(events.length > 0)
-      {
+      if (events.length > 0) {
         await this.loadEventData(events[0]);
       }
 
@@ -327,7 +330,7 @@ export default {
       let groupID = event.Group.id
       let groupRef = await this.$firestore.collection("Groups").doc(groupID).get();
       let group = groupRef.data();
-      for (let userRefs of group.Users){
+      for (let userRefs of group.Users) {
         let userRef = await this.getUserRefByUserId(userRefs.id)
         let user = userRef.data()
         event.Participants.push(user)
@@ -339,16 +342,14 @@ export default {
       event.LoadedItems = []
       event.ItemsFinished = ""
       let currentUser = this.$fb.auth().currentUser.uid
-      for (let itemIndex in event.Items)
-      {
+      for (let itemIndex in event.Items) {
         try {
           let item = await this.getItemData(event.Items[itemIndex])
 
-          if(item.Shopper.id === currentUser)
-          {
+          if (item.Shopper.id === currentUser) {
             event.LoadedItems.push(await this.getItemData(event.Items[itemIndex]))
           }
-        }catch (error){
+        } catch (error) {
           console.warn("Could not load item " + event.Items[itemIndex].id + "! \n " +
             "Maybe item got deleted but reference in the event is still pointing on it")
         }
@@ -356,12 +357,12 @@ export default {
     },
 
     async loadCreatorOfEvent(event) {
-      if (event.Creator){
+      if (event.Creator) {
         let creatorRef = await this.getUserRefByUserId(event.Creator.id)
         let creator = creatorRef.data()
-        if(creator){
+        if (creator) {
           event.Creator = creator.fullName
-        }else{
+        } else {
           event.Creator = ""
         }
       }
@@ -372,10 +373,10 @@ export default {
       let creatorRef = await this.getUserRefByUserId(newItem.Creator.id)
       newItem.Creator = creatorRef.data()
       let shopper
-      try{
+      try {
         let shopperRef = await this.getUserRefByUserId(newItem.Shopper.id)
         shopper = shopperRef.data()
-      }catch (error){
+      } catch (error) {
         shopper = ""
       }
       newItem.Shopper = shopper
@@ -388,10 +389,10 @@ export default {
       let creatorRef = await this.getUserRefByUserId(newItem.Creator.id)
       newItem.Creator = creatorRef.data()
       let shopper
-      try{
+      try {
         let shopperRef = await this.getUserRefByUserId(newItem.Shopper.id)
         shopper = shopperRef.data()
-      }catch (error){
+      } catch (error) {
         shopper = ""
       }
       newItem.Shopper = shopper
@@ -400,11 +401,11 @@ export default {
     async getItemByItemId(itemId) {
       let docRef = this.$firestore.collection("Items").doc(itemId);
       var returnValue
-      await docRef.get().then(function(doc) {
+      await docRef.get().then(function (doc) {
         if (doc.exists) {
           returnValue = doc.data()
         }
-      }).catch(function(error) {
+      }).catch(function (error) {
         console.log("Error getting item:", error);
       });
       return returnValue;
@@ -412,11 +413,11 @@ export default {
     async getUserRefByUserId(userId) {
       let docRef = this.$firestore.collection("users").doc(userId);
       var returnValue
-      await docRef.get().then(function(doc) {
+      await docRef.get().then(function (doc) {
         if (doc.exists) {
           returnValue = doc
         }
-      }).catch(function(error) {
+      }).catch(function (error) {
         console.log("Error getting user:", error);
       });
       return returnValue;
@@ -437,44 +438,23 @@ export default {
       this.$refs.calendar.prev()
     }
   },
+  /**
+   * determines the screen size of the user and therefore adjusts the padding
+   */
+  mounted(){
+    if(this.$q.screen.gt.md){
+      this.padding='q-px-xl'
+    }
+    else{
+      this.padding=''
+    }
+  },
   async created() {
     await this.getDataWithLoading();
   }
 }
 </script>
 
-<style lang="stylus">
-/* Create two equal columns that floats next to each other */
-.columnLeft {
-  float: left;
-  width: 60%;
-  padding: 10px;
-}
-
-.columnRight {
-  float: left;
-  width: 37%;
-  padding: 10px;
-}
-
-/* Clear floats after the columns */
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
-}
-
-/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
-@media screen and (max-width: 800px) {
-  .columnLeft {
-    width: 100%;
-  }
-
-  .columnRight {
-    width: 100%;
-  }
-}
-</style>
 
 
 
