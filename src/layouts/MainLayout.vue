@@ -3,10 +3,10 @@
 
     <q-header elevated class="bg-primary text-white" height-hint="98">
       <q-toolbar>
-        <q-btn dense flat round icon="menu" @click="left = !left" />
-
         <q-toolbar-title>
-
+          <q-avatar round="round" color="white" font-size="35px" size="45px">
+            <img src="../assets/racletteicon.png"/>
+          </q-avatar>
           RaclettOrg
 
           <q-btn round color="secondary float-right" to="/auth/login" icon="login" v-if="!$store.state.auth.isAuthenticated"/>
@@ -32,9 +32,6 @@
       </q-tabs>
     </q-header>
 
-    <q-drawer v-model="left" side="left" bordered>
-      <!-- drawer content -->
-    </q-drawer>
 
     <q-page-container>
       <router-view />
@@ -50,7 +47,6 @@ export default {
   name: 'MainLayout',
   data () {
     return {
-      left: false
     }
   },
   created () {
