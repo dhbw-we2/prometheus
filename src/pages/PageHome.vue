@@ -67,7 +67,8 @@
                 <h4>Nächstes Event</h4>
               </div>
               <div v-if="dataReady" class="col q-pb-md">
-                <q-card class="my-card">
+
+                <q-card class="my-card" v-if="nextEventIndex > -1">
                   <q-card-section>
                     <div class="row items-center no-wrap">
                       <div class="col">
@@ -127,6 +128,16 @@
                     </q-expansion-item>
                   </q-card-section>
                 </q-card>
+                <q-card class="my-card" v-if="nextEventIndex == -1">
+                  <q-card-section>
+                    <div class="row items-center no-wrap">
+                      <div class="col">
+                        <div class="text-h5">Es gibt kein Event in nächster Zeit</div>
+                      </div>
+                    </div>
+                  </q-card-section>
+                </q-card>
+
               </div>
             </div>
           </div>
@@ -149,7 +160,7 @@ export default {
       selectedDate: '',
       padding: '',
       events: [],
-      nextEventIndex: 0,
+      nextEventIndex: -1,
       dataReady: false
     }
   },
