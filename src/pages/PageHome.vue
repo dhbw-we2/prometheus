@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex-center bg-negative">
+  <q-page class="flex-center bg-image">
     <div class="q-pa-md">
       <div class="row">
         <div class="col col-12 offset-md-1 col-md-6">
