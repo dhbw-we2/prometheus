@@ -1,113 +1,69 @@
 <template>
- <q-page class="flex-center bg-image">
+  <q-page class="flex-center bg-image">
     <div class="q-pa-md">
       <div class="row">
         <div class="col col-12 offset-md-1 col-md-6">
-            <div class="flex-center justify-start">
-              <div class="col text-white">
-                <h4>Anstehende Events</h4>
-              </div>
-        </div>
-        <q-card class="my-card">
-          <div class="calendarCard" style="max-width: 1650px; width: 100%;">
-            <div class="row justify-center items-center">
-              <q-btn flat label="Zurück" @click="calendarPrev"/>
-              <q-separator vertical/>
-              <q-btn flat label="Vor" @click="calendarNext"/>
+          <div class="flex-center justify-start">
+            <div class="col text-white">
+              <h4>Anstehende Events</h4>
             </div>
-            <q-separator/>
-            <div style="overflow: hidden">
-              <q-calendar
-                ref="calendar"
-                v-model="selectedDate"
-                view="week-agenda"
-                animated
-                transition-prev="slide-right"
-                transition-next="slide-left"
-                locale="de-de"
-                style="height: 400px;"
-              >
-                <template #day-body="{ timestamp }">
-                  <template v-for="(agenda) in getAgenda(timestamp)">
-                    <div
-                      :key="timestamp.date + agenda.time"
-                      :label="agenda.time"
-                      class="justify-start q-ma-sm shadow-5 bg-grey-6"
-                    >
-                      <div v-if="agenda.avatar" class="row justify-center" style="margin-top: 30px; width: 100%;">
-                        <q-avatar style="margin-top: -25px; margin-bottom: 10px; font-size: 60px; max-height: 50px;">
-                          <img :src="agenda.avatar" style="border: #9e9e9e solid 5px;">
-                        </q-avatar>
-                      </div>
-                      <div class="col-12 q-px-sm">
-                        <strong>{{ agenda.desc }}</strong>
-                      </div>
-                      <div class="col-12 q-px-sm" style="font-size: 15px;">
-                        von {{ agenda.creator }}
-                      </div>
-                      <div class="col-12 q-px-sm" style="font-size: 15px;">
-                        {{ agenda.time }}
-                      </div>
-                    </div>
-                  </template>
-                </template>
-              </q-calendar>
-            </div>
-            <q-card>
-              <div class="calendarCard">
-                <div class="row justify-center items-center">
-                  <q-btn flat label="Prev" @click="calendarPrev"/>
-                  <q-separator vertical/>
-                  <q-btn flat label="Next" @click="calendarNext"/>
-                </div>
-                <q-separator/>
-                <div style="overflow: hidden">
-                  <q-calendar
-                    ref="calendar"
-                    v-model="selectedDate"
-                    view="week-agenda"
-                    animated
-                    transition-prev="slide-right"
-                    transition-next="slide-left"
-                    locale="en-us"
-                    style="height: 400px;"
-                  >
-                    <template #day-body="{ timestamp }">
-                      <template v-for="(agenda) in getAgenda(timestamp)">
-                        <div
-                          :key="timestamp.date + agenda.time"
-                          :label="agenda.time"
-                          class="justify-start q-ma-sm shadow-5 bg-grey-6"
-                        >
-                          <div v-if="agenda.avatar" class="row justify-center" style="margin-top: 30px; width: 100%;">
-                            <q-avatar
-                              style="margin-top: -25px; margin-bottom: 10px; font-size: 60px; max-height: 50px;">
-                              <img :src="agenda.avatar" style="border: #9e9e9e solid 5px;">
-                            </q-avatar>
-                          </div>
-                          <div class="col-12 q-px-sm">
-                            <strong>{{ agenda.time }}</strong>
-                          </div>
-                          <div v-if="agenda.desc" class="col-12 q-px-sm" style="font-size: 10px;">
-                            {{ agenda.desc }}
-                          </div>
-                        </div>
-                      </template>
-                    </template>
-                  </q-calendar>
-                </div>
-              </div>
-            </q-card>
           </div>
-
-          <div class="col col-12 col-md-4">
-            <div :class="padding">
+          <q-card class="my-card">
+            <div class="calendarCard">
+              <div class="row justify-center items-center">
+                <q-btn flat label="Zurück" @click="calendarPrev"/>
+                <q-separator vertical/>
+                <q-btn flat label="Vor" @click="calendarNext"/>
+              </div>
+              <q-separator/>
+              <div style="overflow: hidden">
+                <q-calendar
+                  ref="calendar"
+                  v-model="selectedDate"
+                  view="week-agenda"
+                  animated
+                  transition-prev="slide-right"
+                  transition-next="slide-left"
+                  locale="de-de"
+                  style="height: 400px;"
+                >
+                  <template #day-body="{ timestamp }">
+                    <template v-for="(agenda) in getAgenda(timestamp)">
+                      <div
+                        :key="timestamp.date + agenda.time"
+                        :label="agenda.time"
+                        class="justify-start q-ma-sm shadow-5 bg-grey-6"
+                      >
+                        <div v-if="agenda.avatar" class="row justify-center" style="margin-top: 30px; width: 100%;">
+                          <q-avatar style="margin-top: -25px; margin-bottom: 10px; font-size: 60px; max-height: 50px;">
+                            <img :src="agenda.avatar" style="border: #9e9e9e solid 5px;">
+                          </q-avatar>
+                        </div>
+                        <div class="col-12 q-px-sm">
+                          <strong>{{ agenda.desc }}</strong>
+                        </div>
+                        <div class="col-12 q-px-sm" style="font-size: 15px;">
+                          von {{ agenda.creator }}
+                        </div>
+                        <div class="col-12 q-px-sm" style="font-size: 15px;">
+                          {{ agenda.time }}
+                        </div>
+                      </div>
+                    </template>
+                  </template>
+                </q-calendar>
+              </div>
+            </div>
+          </q-card>
+        </div>
+        <div class="col col-12 col-md-4">
+          <div :class="padding">
             <div class="flex-center justify-start">
               <div class="text-white">
                 <h4>Nächstes Event</h4>
               </div>
               <div v-if="this.events.length > 0" class="col q-pb-md">
-                <q-card class="my-card" style="width: 100%;">
+                <q-card class="my-card">
                   <q-card-section>
                     <div class="row items-center no-wrap">
                       <div class="col">
@@ -169,10 +125,11 @@
                 </q-card>
               </div>
             </div>
-            </div>
-          </div>
           </div>
         </div>
+
+      </div>
+    </div>
   </q-page>
 </template>
 
@@ -242,15 +199,12 @@ export default {
       let groups = await getAllGroupsOfUser(userId);
       let events = await getEventsOfGroups(groups);
 
-      for(let event in events)
-      {
-        if(event != 0)
-        {
+      for (let event in events) {
+        if (event != 0) {
           this.loadCreatorOfEvent(events[event]);
         }
       }
-      if(events.length > 0)
-      {
+      if (events.length > 0) {
         await this.loadEventData(events[0]);
       }
       this.events = events;
@@ -299,7 +253,7 @@ export default {
         if (creator) {
           event.Creator = creator.fullName
           event.CreatorPhoto = creator.profilePhoto
-        }else{
+        } else {
           event.Creator = ""
           event.CreatorPhoto = ""
         }
@@ -367,17 +321,15 @@ export default {
 
 
     getAgenda(day) {
-      let eventsOfDay =  [];
+      let eventsOfDay = [];
       let dateOfDay = new Date(day.date)
 
-      for( let event of this.events)
-      {
+      for (let event of this.events) {
         let dateOfEvent = new Date(event.DateTime.seconds * 1000)
 
-        if(dateOfDay.toDateString() === dateOfEvent.toDateString())
-        {
+        if (dateOfDay.toDateString() === dateOfEvent.toDateString()) {
           let party = {
-            time: dateOfEvent.toTimeString().substr(0,5),
+            time: dateOfEvent.toTimeString().substr(0, 5),
             avatar: event.CreatorPhoto,
             desc: event.Name,
             creator: event.Creator
@@ -397,12 +349,11 @@ export default {
   /**
    * determines the screen size of the user and therefore adjusts the padding
    */
-  mounted(){
-    if(this.$q.screen.gt.md){
-      this.padding='q-px-xl'
-    }
-    else{
-      this.padding=''
+  mounted() {
+    if (this.$q.screen.gt.sm) {
+      this.padding = 'q-px-xl'
+    } else {
+      this.padding = ''
     }
   },
   async created() {
