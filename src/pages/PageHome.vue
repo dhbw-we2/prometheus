@@ -45,8 +45,12 @@
                         <div class="col-12 q-px-sm" style="font-size: 15px;">
                           von {{ agenda.creator }}
                         </div>
+                        <q-separator></q-separator>
                         <div class="col-12 q-px-sm" style="font-size: 15px;">
                           {{ agenda.time }}
+                        </div>
+                        <div class="col-12 q-px-sm" style="font-size: 15px;">
+                          {{ agenda.loc }}
                         </div>
                       </div>
                     </template>
@@ -321,7 +325,7 @@ export default {
     getEventsOfDay(day) {
 
     },
-    
+
     getAgenda(day) {
       let eventsOfDay = [];
       let dateOfDay = new Date(day.date)
@@ -334,7 +338,8 @@ export default {
             time: dateOfEvent.toTimeString().substr(0, 5),
             avatar: event.CreatorPhoto,
             desc: event.Name,
-            creator: event.Creator
+            creator: event.Creator,
+            loc: event.Location
           };
           eventsOfDay.push(party);
         }
