@@ -55,6 +55,7 @@ export default {
     'fbq-uploader': () => import('../../../components/FBQUploader.vue')
   },
   data () {
+    // loading user states
     const state = this.$store.state.user.currentUser
     return {
       email: state.email,
@@ -72,6 +73,7 @@ export default {
         photoType: this.photoType
       }
     },
+    // return the path to the user profilephoto
     prefixPath () {
       const id = this.currentUser.id,
         path = `${id}/${this.photoType}Photo/${this.photoType}Photo.`
@@ -84,6 +86,7 @@ export default {
     resetPhotoType () {
       this.photoType = ''
     },
+    // rule to check if nickname is correct and not forgiven
     async ruleNickname(nickname) {
       if (!nickname) return 'Bitte Nutzernamen ändern...'
       const snapshot = await this.$firestore.collection('users').where('fullName', '==', nickname).get()
@@ -95,6 +98,11 @@ export default {
         return 'Nutzername nicht verfügbar!'
       }
     },
+    /*
+    * save the user data on firestore
+    *
+    * starting spinning gear and handle errors
+    * */
     async saveUserData () {
       const { currentUser, email, fullName, mobile } = this
       this.$q.loading.show({
@@ -118,11 +126,17 @@ export default {
         this.setEditUserDialog(false)
       }
     },
+    /*
+    * checking if background photo is set
+    * */
     showBackgroundPhoto () {
       return this.currentUser.backgroundPhoto === '' ||
         this.currentUser.backgroundPhoto === null ||
         this.currentUser.backgroundPhoto === undefined
     },
+    /*
+    * checking if profile photo is set
+    * */
     showDefaultPhoto () {
       return this.currentUser.profilePhoto === '' ||
         this.currentUser.profilePhoto === null ||
@@ -132,6 +146,9 @@ export default {
       this.photoUpload = true
       this.photoType = type
     },
+    /*
+    * notify user when upload is finished
+    * */
     uploadComplete (info) {
       let fileNames = []
       info.files.forEach(file => fileNames.push(file))

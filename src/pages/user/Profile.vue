@@ -77,6 +77,9 @@ export default {
     }
   },
   methods: {
+    /*
+    * functionality to display the profile data like username, profilephoto and email
+    * */
     ...mapMutations('user', ['setEditUserDialog']),
     getUserData(attr) {
       return (this.currentUser[attr]) ? this.currentUser[attr] : 'Please update your profile'
