@@ -73,23 +73,32 @@
 </template>
 
 <script>
+
+// importing actions from store/auth
 import { mapActions } from 'vuex'
+//importing spinner gears
 import { QSpinnerGears } from 'quasar'
+
 export default {
+  // page name Auth
   name: 'Auth',
   computed: {
+    // return whether the page state is register or login
     getAuthType () {
       return this.isRegistration ? 'Register' : 'Login'
     },
+    // change route to register
     isRegistration () {
       return this.$route.name === 'Register'
     },
+    // return route depending on registration or login
     routeAuthentication () {
       return this.isRegistration ? '/auth/login' : '/auth/register'
     }
   },
   data () {
     return {
+      // vars for the input fields
       email: null,
       isPwd: true,
       password: null,
@@ -97,11 +106,23 @@ export default {
     }
   },
   methods: {
+    /*
+    * mapping user actions to the onSubmit function
+    *
+    * validate inputs
+    *
+    * starting the qspinner gear while processing inputs
+    * calling createNewUser or loginUser in the auth actions
+    *
+    * handle errors and disable the spinning gear after success
+    * */
     ...mapActions('auth', ['createNewUser', 'loginUser']),
     onSubmit () {
       const { email, password } = this
+      // validate input
       this.$refs.emailAuthenticationForm.validate()
         .then(async success => {
+          // starting spinning gear after input is validated
           if (success) {
             this.$q.loading.show({
               message: this.isRegistration ? 'Registering your account...'
@@ -110,6 +131,7 @@ export default {
               spinner: QSpinnerGears,
               customClass: 'loader'
             })
+            // create or login user depending on isRegistration state
             try {
               if (this.isRegistration) {
                 await this.createNewUser({ email, password })
@@ -120,12 +142,14 @@ export default {
               }
 
             } catch (err) {
+              // handling errors and notify user
               console.error(err)
               this.$q.notify({
                 message: `An error as occured: ${err}`,
                 color: 'negative'
               })
             } finally {
+              // disabling the spinning gear
               this.$q.loading.hide()
             }
           }

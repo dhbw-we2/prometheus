@@ -42,6 +42,7 @@ export default function (/* { store, ssrContext } */) {
       // authentication state of the user properly
       await ensureAuthIsInitialized(store)
       if (to.matched.some(record => record.meta.requiresAuth)) {
+        // direct to PageHome or to login page depending on isAuthenticated return value
         if (isAuthenticated(store)) {
           next()
         } else {
@@ -53,6 +54,7 @@ export default function (/* { store, ssrContext } */) {
         }
       } else if ((to.path === '/auth/register' && isAuthenticated(store)) ||
         (to.path === '/auth/login' && isAuthenticated(store))) {
+        // after register redirect to /profile
         next('/profile')
       } else {
         next()

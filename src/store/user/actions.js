@@ -10,7 +10,7 @@ export const getCurrentUser = firestoreAction(({ bindFirestoreRef }, id) => {
   return bindFirestoreRef('currentUser', userRef('users', id))
 })
 
-/**
+/** Update the user data on firestore
  * @param  {Object} {state}
  * @param  {String} id
  * @param  {Object} payload

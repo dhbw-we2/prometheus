@@ -33,12 +33,21 @@ import { QSpinnerGears } from 'quasar'
 export default {
   name: 'ForgotPassword',
   data () {
+    // input variable for email field
     return {
       email: '',
       loading: false
     }
   },
   methods: {
+    /*
+    * validate the input of email field
+    *
+    * starting spinning gear
+    *
+    * calling firebase function to send password reset mail
+    *
+    * */
     onSubmit () {
       this.$refs.forgotPasswordForm.validate()
         .then(async success => {

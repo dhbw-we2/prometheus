@@ -50,9 +50,7 @@ export default {
     }
   },
   created () {
-    // Check that our app has access to the user id
-    // from Firebase before the page renders
-    console.log('FIREBASE AUTH USER uid', this.$store.state.auth.uid)
+
   },
   computed: {
     ...mapGetters('user', ['currentUser']),
