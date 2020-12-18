@@ -4,11 +4,12 @@
     <q-header elevated class="bg-primary text-white" height-hint="98">
       <q-toolbar>
         <q-toolbar-title>
-          <q-avatar round="round" color="white" font-size="35px" size="45px">
-            <img src="../assets/racletteicon.png"/>
-          </q-avatar>
+          <q-btn round to="/">
+            <q-avatar round="round" color="white" font-size="35px" size="45px">
+              <img src="../assets/racletteicon.png"/>
+            </q-avatar>
+          </q-btn>
           RaclettOrg
-
           <q-btn round color="secondary float-right" to="/auth/login" icon="login" v-if="!$store.state.auth.isAuthenticated"/>
           <q-btn round color="secondary float-right" @click="logout" icon="logout" v-if="$store.state.auth.isAuthenticated" />
           <div class="float-right q-mr-sm" v-if="$store.state.auth.isAuthenticated && currentUser">
