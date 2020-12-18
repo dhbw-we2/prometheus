@@ -27,8 +27,8 @@
 
       <q-tabs align="left" v-if="$store.state.auth.isAuthenticated">
         <q-route-tab to="/Home" label="Home"/>
-        <q-route-tab to="/Events" label="Events"/>
-        <q-route-tab to="/Groups" label="Groups"/>
+        <q-route-tab to="/Events" label="Deine Events"/>
+        <q-route-tab to="/Groups" label="Deine Gruppen"/>
       </q-tabs>
     </q-header>
 

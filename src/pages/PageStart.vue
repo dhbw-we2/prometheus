@@ -11,7 +11,8 @@
             rounded
             color="info"
             size="25px"
-            label="Get Started"
+            to="/Home"
+            label="Los Geht's"
           />
         </q-parallax>
       </div>
@@ -27,7 +28,8 @@
             rounded
             color="info"
             size="30px"
-            label="Get Started"
+            to="/Home"
+            label="Los Geht's"
           />
         </q-parallax>
       </div>
@@ -35,21 +37,21 @@
     <div class="q-pa-md  bg-negative">
       <div class="row justify-center" >
 
-        <div class="col col-auto" style="margin: auto; text-align: center">
-          <h5>Easy Organizer for Raclette Evenings with your Friends</h5>
+        <div class="col col-auto text-center">
+          <h5>Deine App zum Organisieren von Raclette-Abenden mit deinen Freunden</h5>
           <div>
             <q-chip size="lg" icon="bookmark">
-              Connecting with Friends
+              Lade deine Freunde ein
+            </q-chip>
+          </div>
+          <div class="q-py-sm">
+            <q-chip size="lg" icon="bookmark">
+              Organisiert euer Event
             </q-chip>
           </div>
           <div>
-            <q-chip size="lg" icon="bookmark" style="margin-top: 10px">
-              Organize Events together
-            </q-chip>
-          </div>
-          <div>
-            <q-chip size="lg" icon="bookmark" style="margin-top: 10px">
-              Enjoy the Raclette Evenings
+            <q-chip size="lg" icon="bookmark">
+              Genießt euer Raclette
             </q-chip>
           </div>
         </div>
@@ -69,18 +71,22 @@
         </q-parallax>
       </div>
       <div class="col-12">
-        <div style="margin: 15px;">
-          Text for Mobile
-          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        <div class="q-pa-md text-h5 text-center text-weight-medium">
+          Lade deine Freunde ein, um gemeinsam ein Raclette-Abend zu planen.
+        </div>
+        <div class="q-pa-md text-h6 text-weight-regular">
+          Dafür kannst du ganz einfach Gruppen erstellen und deine Freune mithilfe ihres Nutzernamens hinzufügen. Dann kann es mit dem Organisieren schon direkt losgehen.
         </div>
       </div>
     </div>
 
     <div class="row col-md-12 gt-sm bg-primary">
-      <div class="col-6 col-md-6">
-        <div style="margin: 15px;">
-          Text for desktop
-          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+      <div class="col-6 col-md-6 vertical-middle">
+        <div class="q-pa-md text-h5 text-center text-weight-medium">
+          Lade deine Freunde ein, um gemeinsam ein Raclette-Abend zu planen.
+        </div>
+        <div class="q-pa-md text-h6 text-weight-regular">
+          Dafür kannst du ganz einfach Gruppen erstellen und deine Freune mithilfe ihres Nutzernamens hinzufügen. Dann kann es mit dem Organisieren schon direkt losgehen.
         </div>
       </div>
       <div class="col-6 col-sm-6 col-xs-12">
@@ -107,8 +113,12 @@
         </q-parallax>
       </div>
       <div class="col-12">
-        <div style="margin: 15px;">
-          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        <div class="q-pa-md text-h5 text-center text-weight-medium">
+          Organisiert euren Raclette-Abend, so dass jeder das hat was er will und braucht!
+        </div>
+        <div class="q-pa-md text-h6 text-weight-regular">
+          Sind wir mal ehrlich, wen hat es noch nie gestört, dass beim Raclette genau das fehlt, das man extra dabei haben wollte. Damit ist jetzt Schluss!
+          Jetzt kann jeder angeben, was man gerne essen würde und was man mitbringt. Damit ist auch endlich Schluss mit den ganzen Dopplungen und Überresten.
         </div>
       </div>
     </div>
@@ -123,8 +133,12 @@
         </q-parallax>
       </div>
       <div class="col-6">
-        <div style="margin: 15px;">
-          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        <div class="q-pa-md text-h5 text-center text-weight-medium">
+          Organisiert euren Raclette-Abend, so dass jeder das hat was er will und braucht!
+        </div>
+        <div class="q-pa-md text-h6 text-weight-regular">
+          Sind wir mal ehrlich, wen hat es noch nie gestört, dass beim Raclette genau das fehlt, das man extra dabei haben wollte. Damit ist jetzt Schluss!
+          Jetzt kann jeder angeben, was man gerne essen würde und was man mitbringt. Damit ist auch endlich Schluss mit den ganzen Dopplungen und Überresten.
         </div>
       </div>
     </div>
@@ -142,18 +156,24 @@
         </q-parallax>
       </div>
       <div class="col-12">
-        <div style="margin: 15px;">
-          Text for Mobile
-          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        <div class="q-pa-md text-h5 text-center text-weight-medium">
+          Jetzt muss nur noch eingekauft werden und der Raclette-Abend kann beginnen!
+        </div>
+        <div class="q-pa-md text-h6 text-weight-regular">
+          Genießt euer Raclette und habt einen schönen Abend! Den genau das wollen wir mit RaclettOrg erreichen.
+          Vielleicht wird ja direkt der nächste Raclette-Abend geplant ;)
         </div>
       </div>
     </div>
 
     <div class="row gt-sm bg-primary">
       <div class="col-6">
-        <div style="margin: 15px;">
-          Text for desktop
-          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        <div class="q-pa-md text-h5 text-center text-weight-medium">
+          Jetzt muss nur noch eingekauft werden und der Raclette-Abend kann beginnen!
+        </div>
+        <div class="q-pa-md text-h6 text-weight-regular">
+          Genießt euer Raclette und habt einen schönen Abend! Den genau das wollen wir mit RaclettOrg erreichen.
+          Vielleicht wird ja direkt der nächste Raclette-Abend geplant ;)
         </div>
       </div>
       <div class="col-6">
@@ -167,9 +187,7 @@
       </div>
     </div>
     <q-separator />
-    <div class="row xl" style="height: 250px">
 
-    </div>
 
   </q-page>
 </template>
