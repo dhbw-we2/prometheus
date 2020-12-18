@@ -8,10 +8,10 @@
               <h4>Alle Events von dir</h4>
             </div>
             <div class="col" v-if="$q.screen.gt.xs">
-              <q-btn color="positive" class="float-right" icon="add" label="Neues Event erstellen" @click="newEventPopup = true"/>
+              <q-btn color="positive" class="float-right" icon="add" label="Neues Event erstellen" @click="openNewEventPopup"/>
             </div>
             <div class="col" v-else>
-              <q-btn color="positive" class="float-right" icon="add" @click="newEventPopup = true"/>
+              <q-btn color="positive" class="float-right" icon="add" @click="openNewEventPopup"/>
             </div>
           </div>
           <q-dialog v-model="newEventPopup" persistent>
@@ -31,6 +31,19 @@
               <q-card-actions align="right" class="text-primary">
                 <q-btn color="negative" flat label="Abbrechen" v-close-popup />
                 <q-btn color="positive" flat label="Erstellen" @click="createNewEvent"/>
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
+          <q-dialog v-model="newGroupPopup" persistent>
+            <q-card style="min-width: 350px">
+              <q-card-section>
+                <div class="text-h6">Du bist in keiner Gruppe.</div>
+                <div>Du musst in einer Gruppe sein um ein Event zu erstellen.
+                  Möchtest du jetzt eine neue Gruppe erstellen?</div>
+              </q-card-section>
+              <q-card-actions align="right" class="text-primary">
+                <q-btn color="negative" flat label="Abbrechen" v-close-popup />
+                <q-btn color="positive" flat label="Neue Gruppe erstellen" to="/Groups"/>
               </q-card-actions>
             </q-card>
           </q-dialog>
@@ -217,6 +230,8 @@ export default {
       ],
       groups:[
       ],
+      // Variable to shop the "New group" popup
+      newGroupPopup: false,
       // Variables for the "New event" popup
       newEventPopup: false,
       newEventName: '',
@@ -564,9 +579,22 @@ export default {
       return returnValue;
     },
     /**
+     * Checks if the user is in any group.
+     * If he is the "new Event" popup is displayed
+     * Otherwise the "new Group" popup is displayed
+     */
+    openNewEventPopup(){
+      if (this.groups.length > 0){
+        this.newEventPopup = true
+      }else {
+        this.newGroupPopup = true
+      }
+    },
+    /**
      * Checks if the popup is filled in correctly and creates a new event in the database
      */
     async createNewEvent() {
+
        try {
          // Checks if the input field are filled
          if(this.newEventName == ""){ throw "Empty event name"};
