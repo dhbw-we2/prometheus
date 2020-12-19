@@ -225,23 +225,18 @@
                       <div class="text-h6 q-pa-sm">Teilnehmer:
                         <div class="q-gutter-x-sm row">
                           <div v-for="user in event.Participants" v-bind:key="user.id">
-                            <div v-if="user.profilePhoto === '' " class="q-pa-sm">
-                              <q-avatar v-if="user.profilePhoto === '' "  color="blue-grey-10" size="28px" font-size="24px" round="round" icon="person" text-color="white">
-                                <q-tooltip>
-                                  {{user.fullName}}
-                                </q-tooltip>
-                              </q-avatar>
-                            </div>
-                            <div v-else >
-                              <q-avatar class="q-pa-sm" size="28px" >
-                                <q-tooltip>
-                                  {{user.fullName}}
-                                </q-tooltip>
-                                <img :src="user.profilePhoto">
-                              </q-avatar>
-                            </div>
+                            <q-avatar v-if="user.profilePhoto === '' "  color="blue-grey-10" size="28px" font-size="24px" round="round" icon="person" text-color="white">
+                              <q-tooltip>
+                                {{user.fullName}}
+                              </q-tooltip>
+                            </q-avatar>
+                            <q-avatar v-else size="28px" >
+                              <q-tooltip>
+                                {{user.fullName}}
+                              </q-tooltip>
+                              <img :src="user.profilePhoto">
+                            </q-avatar>
                           </div>
-
                         </div>
                       </div>
                     </div>
