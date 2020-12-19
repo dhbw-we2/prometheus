@@ -157,7 +157,8 @@
                         <q-item
                           v-for="item in event.LoadedItems" v-bind:key="item.id">
                           <q-item-section avatar>
-                            <q-avatar size="28px">
+                            <q-avatar color="blue-grey-10" size="28px" font-size="28px" round="round" icon="person" text-color="white" v-if="item.Creator.profilePhoto === '' "></q-avatar>
+                            <q-avatar size="28px" v-else>
                               <img :src="item.Creator.profilePhoto">
                             </q-avatar>
                           </q-item-section>
@@ -167,7 +168,8 @@
                           </q-item-section>
                           <q-item-section v-else-if="item.Shopper.id === currentUserId()" avatar>
                             <q-btn round size="sm" color="red" @click="stopShopItem(event.id, item.Id)">
-                              <q-avatar size="28px">
+                              <q-avatar size="28px" round="round" icon="person" v-if="item.Shopper.profilePhoto === '' "></q-avatar>
+                              <q-avatar size="28px" v-else>
                                 <img :src="item.Shopper.profilePhoto">
                               </q-avatar>
                             </q-btn>
@@ -196,11 +198,14 @@
                   <div class="row">
                     <div class="col col-12 col-md-6 q-pa-sm">
                       <div class="text-h6 q-pa-sm">Teilnehmer:
-                        <div class="q-gutter-x-sm">
-                          <q-avatar class="q-pa-sm" size="28px"
-                                    v-for="user in event.Participants" v-bind:key="user.id">
-                            <img :src="user.profilePhoto">
-                          </q-avatar>
+                        <div class="q-gutter-x-sm row">
+                          <div v-for="user in event.Participants" v-bind:key="user.id">
+                              <q-avatar v-if="user.profilePhoto === '' " color="blue-grey-10" size="28px" font-size="28px" round="round" icon="person" text-color="white"></q-avatar>
+                              <q-avatar v-else class="q-pa-sm" size="28px" >
+                                <img :src="user.profilePhoto">
+                              </q-avatar>
+                          </div>
+
                         </div>
                       </div>
                     </div>
@@ -220,6 +225,7 @@ import {date} from "quasar";
 import firebase from 'firebase/app';
 import { QSpinnerGears } from 'quasar'
 import {currentUser} from "src/store/user/getters";
+import {mapGetters, mapActions, mapMutations } from 'vuex';
 
 export default {
   name: 'PageEvents',
@@ -268,6 +274,15 @@ export default {
     dateToString(timestamp){
       let timestampInMs = timestamp.seconds * 1000
       return date.formatDate(timestampInMs, "DD.MM.YYYY HH:mm") + " Uhr"
+    }
+  },
+  computed: {
+    ...mapGetters('user', ['currentUser']),
+    meta () {
+      return {
+        id: this.currentUser.id,
+        photoType: this.photoType
+      }
     }
   },
   methods:{

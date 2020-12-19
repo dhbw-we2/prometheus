@@ -94,7 +94,8 @@
                         <q-item clickable v-ripple
                         v-for="user in group.Users" v-bind:key="user.id">
                           <q-item-section avatar>
-                            <q-avatar>
+                            <q-avatar color="blue-grey-10" icon="person" text-color="white" v-if="user.profilePhoto === '' "></q-avatar>
+                            <q-avatar v-else>
                               <img :src="user.profilePhoto">
                             </q-avatar>
                           </q-item-section>
@@ -227,13 +228,13 @@ export default {
       group.id = groupRef.id
 
       //get event-data
-      this.fillEventData(group)
+      await this.fillEventData(group)
 
       //get user-data
-      this.fillUserData(group)
+      await this.fillUserData(group)
 
       //get admins-data
-      this.fillAdminData(group)
+      await this.fillAdminData(group)
 
       return group
     },

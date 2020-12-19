@@ -147,7 +147,7 @@ export default {
               // handling errors and notify user
               if (registerMessage){
                 this.$q.notify({
-                  message: `Bei der Registrierung ist ein Fehler aufgetreten.`,
+                  message: `Bei der Registrierung ist ein Fehler aufgetreten: ` + err,
                   color: 'negative'
                 })
               }else{
