@@ -92,7 +92,7 @@
                       <div class="text-h6 q-pa-sm">Teilnehmer:</div>
                       <q-list bordered separator>
                         <q-item clickable v-ripple
-                        v-for="user in group.Users">
+                        v-for="user in group.Users" v-bind:key="user.id">
                           <q-item-section avatar>
                             <q-avatar>
                               <img :src="user.profilePhoto">
@@ -137,7 +137,7 @@
                       <div class="text-h6 q-pa-sm">Events:</div>
                       <q-list bordered separator>
                         <q-item clickable v-ripple
-                        v-for="event in group.events">
+                        v-for="event in group.events" v-bind:key="event.vueId">
                           <q-item-section>
                             <q-item-label>{{ event.Name }}</q-item-label>
                             <q-item-label caption>{{ event.DateTime | dateToString }}</q-item-label>
@@ -248,7 +248,6 @@ export default {
         await this.getGroupsData()
 
       } catch (err) {
-        console.error(err)
         this.$q.notify({
           message: "Ein Fehler ist aufgetreten: ${err}",
           color: 'negative'
@@ -283,9 +282,7 @@ export default {
         if (doc.exists) {
           returnValue = doc.data()
         }
-      }).catch(function(error) {
-        console.log("Error getting user:", error);
-      });
+      }).catch(function(error) {});
       return returnValue;
     },
     async createNewGroup(){
@@ -302,10 +299,16 @@ export default {
           Admins: [userRef]
         })
       }catch (error){
-        console.log(error);
-        alert("Bitte fülle alle Felder aus");
+        this.$q.notify({
+          message: `Bitte gib deiner Gruppe einen Namen.`,
+          color: 'negative'
+        })
         return;
       }
+      this.$q.notify({
+        message: "Deine neue Gruppe wurde erfolgreich erstellt.",
+        color: 'positive'
+      })
       // Close popup if event created successfully
       this.newGroupPrompt = false;
       await this.getGroupsWithLoading()
@@ -330,9 +333,7 @@ export default {
       groupData.Admins.push(userRef)
       await this.$firestore.collection('Groups').doc(group.id).update({
         Admins: groupData.Admins
-      }).then(function () {
-        console.log("Updated succesfully")
-      })
+      }).then(function () {})
       await this.getGroupsWithLoading()
     },
     async removeFromAdminList(group, userId)
@@ -383,9 +384,12 @@ export default {
       await this.$firestore.collection('Groups').doc(group.id).update({
         Users: groupData.Users,
         Admins: groupData.Admins
-      }).then(function () {
-        console.log("Updated succesfully")
-      })
+      }).then(
+        this.$q.notify({
+          message: "Deine neue Gruppe wurde erfolgreich erstellt.",
+          color: 'positive'
+        })
+      )
       await this.getGroupsWithLoading()
     },
     async getUserByUsername(username){

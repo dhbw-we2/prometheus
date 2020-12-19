@@ -89,7 +89,7 @@
                 <div class="text-h6">Willst du das Event <strong>"{{ deleteEventName }}"</strong> wirklich löschen?</div>
               </q-card-section>
               <q-card-section>
-                <div class="text-body1">Falls du die Gruppe verlässt, verlierst du auch den Zugriff auf alle Events der Gruppe.</div>
+                <div class="text-body1">Das Event wird für alle Mitglieder der Gruppe gelöscht, nicht nur für dich!</div>
               </q-card-section>
               <q-card-actions align="right" class="text-primary">
                 <q-btn color="negative" flat label="Abbrechen" @click="deleteEventPopup = false" />
@@ -155,7 +155,7 @@
                     <q-card>
                       <q-list>
                         <q-item
-                          v-for="item in event.LoadedItems">
+                          v-for="item in event.LoadedItems" v-bind:key="item.id">
                           <q-item-section avatar>
                             <q-avatar size="28px">
                               <img :src="item.Creator.profilePhoto">
@@ -198,7 +198,7 @@
                       <div class="text-h6 q-pa-sm">Teilnehmer:
                         <div class="q-gutter-x-sm">
                           <q-avatar class="q-pa-sm" size="28px"
-                                    v-for="user in event.Participants">
+                                    v-for="user in event.Participants" v-bind:key="user.id">
                             <img :src="user.profilePhoto">
                           </q-avatar>
                         </div>
@@ -280,7 +280,7 @@ export default {
     async loadData() {
       // Loading and displaying the qspinner
       this.$q.loading.show({
-        message:  'Loading Events...',
+        message:  'Lade deine Events...',
         backgroundColor: 'grey',
         spinner: QSpinnerGears,
         customClass: 'loader'
@@ -293,9 +293,8 @@ export default {
         // Await all events of all groups and start filling them with data async.
         this.loadDataOfEvents(await this.getEventsOfGroups(allGroupsOfUser))
       } catch (err) {
-        console.error(err)
         this.$q.notify({
-          message: 'An error as occured: ${err}',
+          message: 'Ein Fehler beim laden der Events ist aufgetreten.',
           color: 'negative'
         })
       } finally {
@@ -326,9 +325,7 @@ export default {
           querySnapshot.forEach(function(doc) {
             data.push(doc);
           });
-        }).catch(function(error) {
-          console.warn("Error in firebase access: getting all groups of user: " + userId + error);
-        });
+        }).catch(function(error) {});
       return data;
     },
     /**
@@ -362,9 +359,7 @@ export default {
             querySnapshot.forEach(function(doc) {
               eventsOfGroup.push(doc);
             });
-          }).catch(function(error) {
-            console.warn("Error in firebase access: getting all events of group: " + group.id + error);
-          });
+          }).catch(function(error) {});
         // Copy events into array of events of all groups
         for (let event of eventsOfGroup){
           let data = event.data()
@@ -435,10 +430,7 @@ export default {
         try {
           // Load the data of the item and push the item containing the data into the loadedItems array
           event.LoadedItems.push(await this.getItemData(event.Items[itemIndex]))
-        }catch (error){
-          console.warn("Could not load item " + event.Items[itemIndex].id + "! \n " +
-            "Possible that item got deleted but reference in the event is still pointing on it")
-        }
+        }catch (error){}
       }
       // Check the status of the items
       this.evaluateItemStatusOfEvent(event)
@@ -535,9 +527,7 @@ export default {
           querySnapshot.forEach(function(doc) {
             data.push(doc);
           });
-        }).catch(function(error) {
-          console.warn("Error in firebase access: getting group by name: " + groupName + error);
-      });
+        }).catch(function(error) {});
       return data;
     },
     /**
@@ -554,9 +544,7 @@ export default {
         if (doc.exists) {
           returnValue = doc.data()
         }
-      }).catch(function(error) {
-        console.warn("Error in firebase access: getting item: " + itemId + error);
-      });
+      }).catch(function(error) {});
       return returnValue;
     },
     /**
@@ -573,9 +561,7 @@ export default {
         if (doc.exists) {
           returnValue = doc
         }
-      }).catch(function(error) {
-        console.warn("Error in firebase access: getting user reference by id:" + userId + error);
-      });
+      }).catch(function(error) {});
       return returnValue;
     },
     /**
@@ -622,9 +608,16 @@ export default {
         this.Events = []
         await this.loadData();
       }catch (error){
-        alert("Bitte fülle alle Felder aus.")
+         this.$q.notify({
+           message: `Bitte fülle alle Felder aus.`,
+           color: 'negative'
+         })
         return;
       }
+      this.$q.notify({
+        message: "Das Event wurde erfolgreich erstellt.",
+        color: 'positive'
+      })
       // Clear the variables and hide the popup
       this.newEventPopup = false;
       this.newEventGroup = ''
@@ -693,13 +686,14 @@ export default {
           // Input the new item as a reference to the event items
           eventReference.update({
             Items: firebase.firestore.FieldValue.arrayUnion(newItemReference)
-          }).catch(function(error){
-            console.warn("Error in firebase access: updating Items in event: " + itemEventId + error)
-          })
+          }).catch(function(error){})
           // Add the item to the viewed event without reloading from the database
           this.addItemToEvent(itemEventId, newItemId)
         }catch (error){
-          alert("Bitte fülle alle Felder aus.");
+          this.$q.notify({
+            message: `Bitte fülle alle Felder aus.`,
+            color: 'negative'
+          })
           return;
         }
       // Clear the variables and hide the popup
@@ -740,9 +734,7 @@ export default {
       // Updates the event with the removed item in the database
       await this.$firestore.collection("Events").doc(this.deleteItemEventId).update({
         Items: eventData.Items
-      }).catch(function(error) {
-        console.warn("Error in firebase access: updating items of event: " + this.deleteItemEventId + error);
-      });
+      }).catch(function(error) {});
       // Get the loaded items of the event
       let eventItems = this.Events.find(event => event.id === this.deleteItemEventId).LoadedItems
       // Delete the item from the loaded items, so that it is no longer displayed
@@ -798,9 +790,7 @@ export default {
       // Set the current user as shopper from the item in the database
       let itemRef = this.$firestore.collection("Items").doc(itemId).update({
         Shopper: currentUserRef
-      }).catch(function(error) {
-        console.warn("Error in firebase access: updating shopper of item: " + itemId + error);
-      });
+      }).catch(function(error) {});
       // Set the current user as shopper of the loaded item so no reload of the database is needed
       let event = this.Events.find(event => event.id === eventId)
       let item = event.LoadedItems.find(item => item.Id === itemId)
@@ -818,9 +808,7 @@ export default {
       // Delete the shopper of the item in the database
       let itemRef = this.$firestore.collection("Items").doc(itemId).update({
         Shopper: firebase.firestore.FieldValue.delete()
-      }).catch(function(error) {
-        console.warn("Error in firebase access: deleting shopper of item: " + itemId + error);
-      });
+      }).catch(function(error) {});
       // Remove the user from the shopper of the loaded item, so no database reload is needed
       let event = this.Events.find(event => event.id === eventId)
       let item = event.LoadedItems.find(item => item.Id === itemId)
@@ -878,15 +866,11 @@ export default {
       if(eventData.Items){
         // Delete all items that the event referenced to
         for(let item of eventData.Items){
-          this.$firestore.collection("Items").doc(item.id).delete().catch(function(error){
-            console.warn("Firebase Access Error: Could not delete Item with Id: ", item.id, error)
-          })
+          this.$firestore.collection("Items").doc(item.id).delete().catch(function(error){})
         }
       }
       // Deletes the event from the database
-      this.$firestore.collection("Events").doc(this.deleteEventId).delete().catch(function(error){
-        console.warn("Firebase Access Error: Could not delete Event with Id: ", this.deleteEventId, error)
-      })
+      this.$firestore.collection("Events").doc(this.deleteEventId).delete().catch(function(error){})
       // Deletes the event from the loaded events to no longer display it
       for(let eventIndex in this.Events){
         if(this.Events[eventIndex].id == this.deleteEventId){
@@ -894,6 +878,10 @@ export default {
           break;
         }
       }
+      this.$q.notify({
+        message: "Das Event wurde gelöscht.",
+        color: 'positive'
+      })
       // Hides popup and clears variables
       this.deleteEventPopup = false
       this.deleteEventName = ""

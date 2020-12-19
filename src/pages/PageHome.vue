@@ -112,7 +112,7 @@
                       <q-card>
                         <q-list>
                           <q-item
-                            v-for="item in events[nextEventIndex].LoadedItems">
+                            v-for="item in events[nextEventIndex].LoadedItems" v-bind:key="item.id">
                             <q-item-section avatar>
                               <q-avatar size="28px">
                                 <img :src="item.Creator.profilePhoto">
@@ -316,7 +316,7 @@ export default {
           returnValue = doc.data()
         }
       }).catch(function (error) {
-        console.log("Error getting item:", error);
+
       });
       return returnValue;
     },
@@ -327,9 +327,7 @@ export default {
         if (doc.exists) {
           returnValue = doc
         }
-      }).catch(function (error) {
-        console.log("Error getting user:", error);
-      });
+      }).catch(function (error) {});
       return returnValue;
     },
 

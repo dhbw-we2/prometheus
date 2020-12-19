@@ -90,9 +90,6 @@ export default {
     async ruleNickname(nickname) {
       if (!nickname) return 'Bitte Nutzernamen ändern...'
       const snapshot = await this.$firestore.collection('users').where('fullName', '==', nickname).get()
-      console.log(snapshot)
-      console.log(nickname)
-      console.log(this.currentUser.fullName)
       if (!snapshot.empty && nickname != this.currentUser.fullName) {
         this.step = 0
         return 'Nutzername nicht verfügbar!'

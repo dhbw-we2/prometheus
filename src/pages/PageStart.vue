@@ -7,12 +7,19 @@
                     style="width: 100%;"
         >
           <h3 class="text-white">RaclettOrg</h3>
-          <q-btn
-            rounded
-            color="info"
-            size="25px"
-            to="/Home"
-            label="Los Geht's"
+          <q-btn v-if="$store.state.auth.isAuthenticated"
+             rounded
+             color="info"
+             size="25px"
+             to="/Home"
+             label="Los Geht's"
+          />
+          <q-btn v-else
+             rounded
+             color="info"
+             size="25px"
+             to="/auth/login"
+             label="Los Geht's"
           />
         </q-parallax>
       </div>
@@ -24,11 +31,18 @@
           style="width: 100%;"
         >
           <h1 class="text-white">RaclettOrg</h1>
-          <q-btn
+          <q-btn v-if="$store.state.auth.isAuthenticated"
             rounded
             color="info"
             size="30px"
             to="/Home"
+            label="Los Geht's"
+          />
+          <q-btn v-else
+            rounded
+            color="info"
+            size="30px"
+            to="/auth/login"
             label="Los Geht's"
           />
         </q-parallax>

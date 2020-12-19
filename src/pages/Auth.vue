@@ -11,9 +11,9 @@
         for="email"
         lazy-rules="lazy-rules"
         name="email"
-        label="EMAIL"
+        label="EMAIL ADRESSE"
         type="email"
-        :rules="[val => !!val || '*Field is required', val => val.includes('@') && val.includes('.') || '*Please Provide a valid email']"
+        :rules="[val => !!val || '*Feld wird benötigt', val => val.includes('@') && val.includes('.') || '*Bitte trage eine gültige Email Adresse ein']"
       />
       <q-input
         v-model="password"
@@ -24,8 +24,8 @@
         autocomplete="current-password"
         color="primary"
         data-cy="password"
-        label="PASSWORD"
-        :rules="[val => !!val || '*Field is required']"
+        label="PASSWORT"
+        :rules="[val => !!val || '*Feld wird benötigt']"
         :type="isPwd ? 'password' : 'text'"
         @keyup.enter="onSubmit();"
       >
@@ -40,9 +40,9 @@
         autocomplete="new-password"
         color="primary"
         data-cy="verifyPassword"
-        label="VERIFY PASSWORD"
+        label="PASSWORT BESTÄTIGEN"
         v-model="passwordMatch"
-        :rules="[val => !!val || '*Field is required', val => val === password || '*Passwords don\'t match']"
+        :rules="[val => !!val || '*Feld wird benötigt', val => val === password || '*Passwörter stimmen nicht überein']"
         :type="isPwd ? 'password' : 'text'"
         @keyup.enter="onSubmit();"
       >
@@ -61,12 +61,12 @@
 
       <p class="q-mt-md q-mb-none text-center">
         <router-link class="text-blue" :to="routeAuthentication">
-          <span v-if="isRegistration">Need to login?</span>
-          <span v-else>Need to create an account?</span>
+          <span v-if="isRegistration">Jetzt einloggen</span>
+          <span v-else>Einen neuen Account erstellen</span>
         </router-link>
       </p>
       <p class="q-ma-sm text-center">
-        <router-link class="text-blue" to="forgotPassword">Forgot Password?</router-link>
+        <router-link class="text-blue" to="forgotPassword">Passwort vergessen?</router-link>
       </p>
     </q-form>
   </q-page>
@@ -85,7 +85,7 @@ export default {
   computed: {
     // return whether the page state is register or login
     getAuthType () {
-      return this.isRegistration ? 'Register' : 'Login'
+      return this.isRegistration ? 'Registrieren' : 'Einloggen'
     },
     // change route to register
     isRegistration () {
@@ -125,29 +125,38 @@ export default {
           // starting spinning gear after input is validated
           if (success) {
             this.$q.loading.show({
-              message: this.isRegistration ? 'Registering your account...'
-                : 'Authenticating your account...',
+              message: this.isRegistration ? 'Dein Account wird registriert...'
+                : 'Du wirst eingeloggt...',
               backgroundColor: 'grey',
               spinner: QSpinnerGears,
               customClass: 'loader'
             })
             // create or login user depending on isRegistration state
+            let registerMessage = true
             try {
               if (this.isRegistration) {
                 await this.createNewUser({ email, password })
                 this.$router.push({ path: '/user/profile' })
               } else {
+                registerMessage = false
                 await this.loginUser({ email, password })
                 this.$router.push({ path: '/home' })
               }
 
             } catch (err) {
               // handling errors and notify user
-              console.error(err)
-              this.$q.notify({
-                message: `An error as occured: ${err}`,
-                color: 'negative'
-              })
+              if (registerMessage){
+                this.$q.notify({
+                  message: `Bei der Registrierung ist ein Fehler aufgetreten.`,
+                  color: 'negative'
+                })
+              }else{
+                this.$q.notify({
+                  message: `Email Adresse und Passwort stimmen nicht überein.`,
+                  color: 'negative'
+                })
+              }
+
             } finally {
               // disabling the spinning gear
               this.$q.loading.hide()

@@ -48,7 +48,7 @@ export default function (/* { store, ssrContext } */) {
         } else {
           next('/auth/login')
           Notify.create({
-            message: 'You must be logged in to access this page',
+            message: 'Du musst eingeloggt sein um auf diese Seite zuzugreifen.',
             type: 'warning'
           })
         }
