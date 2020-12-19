@@ -17,4 +17,6 @@ https://raclettorg.web.app/
 
 Um die Anwendung zu starten folgendes Kommando im Terminal verwenden:
 
+```shell
 npm run dev
+```
