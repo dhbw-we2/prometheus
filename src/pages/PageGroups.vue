@@ -456,7 +456,7 @@ export default {
      * @returns {*} the updated user array
      */
     removeUserFromUserArray(userId, userArray){
-      for(let userIndex in UserArray)
+      for(let userIndex in userArray)
       {
         if(userArray[userIndex].id == userId)
         {
