@@ -157,25 +157,50 @@
                         <q-item
                           v-for="item in event.LoadedItems" v-bind:key="item.id">
                           <q-item-section avatar>
-                            <q-avatar color="blue-grey-10" size="28px" font-size="28px" round="round" icon="person" text-color="white" v-if="item.Creator.profilePhoto === '' "></q-avatar>
+                            <q-avatar color="blue-grey-10" size="28px" font-size="24px" round="round" icon="person" text-color="white" v-if="item.Creator.profilePhoto === '' ">
+                              <q-tooltip>
+                                {{item.Creator.fullName}} hats erstellt
+                              </q-tooltip>
+                            </q-avatar>
                             <q-avatar size="28px" v-else>
+                              <q-tooltip>
+                                {{item.Creator.fullName}} hats erstellt
+                              </q-tooltip>
                               <img :src="item.Creator.profilePhoto">
                             </q-avatar>
                           </q-item-section>
 
                           <q-item-section v-if="item.Shopper === ''" avatar>
+                            <q-tooltip>
+                              Bring mich mit
+                            </q-tooltip>
                             <q-btn round size="sm" color="orange" icon="add_task" @click="assignItemToUser(event.id, item.Id)"/>
                           </q-item-section>
                           <q-item-section v-else-if="item.Shopper.id === currentUserId()" avatar>
                             <q-btn round size="sm" color="red" @click="stopShopItem(event.id, item.Id)">
-                              <q-avatar size="28px" round="round" icon="person" v-if="item.Shopper.profilePhoto === '' "></q-avatar>
+                              <q-avatar size="28px" round="round" icon="person" v-if="item.Shopper.profilePhoto === '' ">
+                                <q-tooltip>
+                                  Ich brings mit
+                                </q-tooltip>
+                              </q-avatar>
                               <q-avatar size="28px" v-else>
+                                <q-tooltip>
+                                  Ich brings mit
+                                </q-tooltip>
                                 <img :src="item.Shopper.profilePhoto">
                               </q-avatar>
                             </q-btn>
                           </q-item-section>
                           <q-item-section v-else avatar>
-                            <q-avatar size="28px">
+                            <q-avatar color="blue-grey-10" size="28px" font-size="28px" round="round" icon="person" text-color="white"  v-if="item.Shopper.profilePhoto === '' ">
+                              <q-tooltip>
+                                {{item.Shopper.fullName}} bringts mit
+                              </q-tooltip>
+                            </q-avatar>
+                            <q-avatar v-else size="28px">
+                              <q-tooltip>
+                                {{item.Shopper.fullName}} bringts mit
+                              </q-tooltip>
                               <img :src="item.Shopper.profilePhoto">
                             </q-avatar>
                           </q-item-section>
@@ -200,10 +225,21 @@
                       <div class="text-h6 q-pa-sm">Teilnehmer:
                         <div class="q-gutter-x-sm row">
                           <div v-for="user in event.Participants" v-bind:key="user.id">
-                              <q-avatar v-if="user.profilePhoto === '' " color="blue-grey-10" size="28px" font-size="28px" round="round" icon="person" text-color="white"></q-avatar>
-                              <q-avatar v-else class="q-pa-sm" size="28px" >
+                            <div v-if="user.profilePhoto === '' " class="q-pa-sm">
+                              <q-avatar v-if="user.profilePhoto === '' "  color="blue-grey-10" size="28px" font-size="28px" round="round" icon="person" text-color="white">
+                                <q-tooltip>
+                                  {{user.fullName}}
+                                </q-tooltip>
+                              </q-avatar>
+                            </div>
+                            <div v-else >
+                              <q-avatar class="q-pa-sm" size="28px" >
+                                <q-tooltip>
+                                  {{user.fullName}}
+                                </q-tooltip>
                                 <img :src="user.profilePhoto">
                               </q-avatar>
+                            </div>
                           </div>
 
                         </div>
