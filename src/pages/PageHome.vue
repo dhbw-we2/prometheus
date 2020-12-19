@@ -114,7 +114,8 @@
                           <q-item
                             v-for="item in events[nextEventIndex].LoadedItems" v-bind:key="item.id">
                             <q-item-section avatar>
-                              <q-avatar size="28px">
+                              <q-avatar color="blue-grey-10" icon="person" text-color="white" v-if="item.Creator.profilePhoto === '' "></q-avatar>
+                              <q-avatar v-else size="28px">
                                 <img :src="item.Creator.profilePhoto">
                               </q-avatar>
                             </q-item-section>
