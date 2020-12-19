@@ -5,7 +5,7 @@
         <div class="col col-12 offset-0 col-md-8 offset-md-2">
           <div class="row flex-center justify-start">
             <div class="col text-white">
-              <h4>Alle Events von dir</h4>
+              <h4>Deine Events</h4>
             </div>
             <div class="col" v-if="$q.screen.gt.xs">
               <q-btn color="positive" class="float-right" icon="add" label="Neues Event erstellen" @click="openNewEventPopup"/>
@@ -72,9 +72,9 @@
               </q-card-section>
 
               <q-card-section class="q-pt-none">
-                <div> Zutat: {{deleteItemName}} </div>
-                <div> Menge: {{deleteItemAmount}}</div>
-                <div> Hinzugefügt von: {{deleteItemCreator}}</div>
+                <div> <strong>Zutat:</strong> {{deleteItemName}} </div>
+                <div> <strong>Menge:</strong> {{deleteItemAmount}}</div>
+                <div> <strong>Hinzugefügt von:</strong> {{deleteItemCreator}}</div>
               </q-card-section>
 
               <q-card-actions align="right" class="text-primary">
@@ -226,7 +226,7 @@
                         <div class="q-gutter-x-sm row">
                           <div v-for="user in event.Participants" v-bind:key="user.id">
                             <div v-if="user.profilePhoto === '' " class="q-pa-sm">
-                              <q-avatar v-if="user.profilePhoto === '' "  color="blue-grey-10" size="28px" font-size="28px" round="round" icon="person" text-color="white">
+                              <q-avatar v-if="user.profilePhoto === '' "  color="blue-grey-10" size="28px" font-size="24px" round="round" icon="person" text-color="white">
                                 <q-tooltip>
                                   {{user.fullName}}
                                 </q-tooltip>
@@ -760,6 +760,7 @@ export default {
      * @param itemId the id of the item to delete
      */
     async deleteItemClick(eventId, itemId) {
+
       // Loads the data of the item from the database
       let item = await this.getItemDataById(itemId)
       // Fill in variables and shop popup
@@ -799,6 +800,10 @@ export default {
       // Update the event to save the changes
       let event = this.Events.find(event => event.id === this.deleteItemEventId)
       event.Items = eventItems
+      this.$q.notify({
+        message: `Zutat wurde gelöscht.`,
+        color: 'positive'
+      })
       // Close the popup and reevaluate the item status
       this.resetDeleteItem()
       this.evaluateItemStatusOfEvent(event)

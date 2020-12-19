@@ -5,7 +5,7 @@
         <div class="col col-12 offset-0 col-md-8 offset-md-2">
           <div class="row flex-center justify-start">
             <div class="col text-white">
-              <h4>All deine Gruppen</h4>
+              <h4>Deine Gruppen</h4>
             </div>
             <div class="col" v-if="$q.screen.gt.xs">
               <q-btn color="positive" class="float-right" icon="add" label="Neue Gruppe erstellen" @click="newGroupPrompt = true"/>
