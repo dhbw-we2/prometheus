@@ -51,7 +51,7 @@ export default {
     // Boolean to check if network is available
     const isOnline = window.navigator.onLine
     this.$q.loading.show({
-      message: isOnline ? 'Loading your user information...' : 'Looks like you\'ve lost network connectivity. Please connect back to your network to access your data.',
+      message: isOnline ? 'Laden deiner Daten...' : 'Es scheint als hättest du keine Internetverbindung. Bitte verbinde dich um deine Daten einzusehen.',
       backgroundColor: isOnline ? 'grey' : 'red-6',
       spinner: isOnline ? QSpinnerGears : QSpinnerRadio,
       customClass: 'loader'
@@ -82,7 +82,7 @@ export default {
     * */
     ...mapMutations('user', ['setEditUserDialog']),
     getUserData(attr) {
-      return (this.currentUser[attr]) ? this.currentUser[attr] : 'Please update your profile'
+      return (this.currentUser[attr]) ? this.currentUser[attr] : 'Bitte aktualisiere dein Profil'
     },
     setBlur() {
       this.$emit('setBlur')

@@ -56,7 +56,7 @@ export default {
         .catch(err => {
           this.$q.notify({
             color: 'negative',
-            message: `One or more of your files failed to upload. ${err}`
+            message: `Eins oder mehrere deiner Dateien konnten nicht hochgeladen werden. ${err}`
           })
         })
     },
@@ -78,7 +78,7 @@ export default {
           (err) => {
             this.$q.notify({
               color: 'negative',
-              message: `There was a problem with the upload. ${err}`
+              message: `Es gab ein Problem beim Hochladen ${err}`
             })
             this.updateComponent(index, 0, 'failed')
             reject()
