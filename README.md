@@ -10,6 +10,7 @@ Funktionalität:
 * Einsicht, wer was mitbringt und ob etwas fehlt
 * Wichtigste Infos auf der Startseite --> Kalender, Infos zum nächsten Event
 
+## Produktion
 Link zur Website:
 https://raclettorg.web.app/
 
