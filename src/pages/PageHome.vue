@@ -151,13 +151,14 @@
 
 <script>
 import {date} from "quasar";
-import firebase from 'firebase/app';
 import {QSpinnerGears} from 'quasar';
+// import some functions from other locations
 import {getAllGroupsOfUser, getEventsOfGroups} from "src/js/global.js";
 
 export default {
   data() {
     return {
+      // data to fill the Home Page
       selectedDate: '',
       padding: '',
       events: [],
@@ -166,13 +167,20 @@ export default {
     }
   },
   filters: {
+    /**
+     * Filter to display a timestamp in normal date time format
+     * @param timestamp
+     * @returns {string}
+     */
     dateToString(timestamp) {
       let timestampInMs = timestamp.seconds * 1000
       return date.formatDate(timestampInMs, "DD.MM.YYYY HH:mm") + " Uhr"
     }
   },
   methods: {
-
+    /*
+    * load the data and display a spinning gear while fetching data from the database
+    * */
     async getDataWithLoading() {
       this.$q.loading.show({
         message: 'Deine Daten werden geladen...',
@@ -194,6 +202,10 @@ export default {
         this.$q.loading.hide()
       }
     },
+    /*
+    * @param userId
+    * @returns list of items where user is the shopper
+    * */
     async getItemsOfUser(userId) {
       let data = [];
       let userRef = this.$firestore.collection("users").doc(userId);
@@ -205,6 +217,12 @@ export default {
         });
       return data;
     },
+    /*
+    * loading all groups of the current user
+    * loading all events of the groups of the user
+    *
+    * load the specific data of the next event
+    * */
     async getCalendarData() {
       let userId = this.$fb.auth().currentUser.uid
       let groups = await getAllGroupsOfUser(userId);
@@ -215,6 +233,7 @@ export default {
         let nextEventLoaded = false
         for(let event in events)
         {
+          // checking which event is the next in the future
           if( (Date.now() < (events[event].DateTime.seconds * 1000) ) && !nextEventLoaded)
           {
             this.nextEventIndex = event;
@@ -225,29 +244,50 @@ export default {
           }
         }
       }
-
+      // setting the data and the ready flag
       this.events = events;
       this.dataReady = true;
     },
-
+    /**
+     * Exchanges the references in the events with actual data for a single event
+     * @param event Reference to the event to load the data
+     * @returns {Promise<void>}
+     */
     async loadEventData(event) {
+      // Load all items async. Dont await this because every call goes into the database and takes quite long.
+      // Without awaiting the items are filled in dynamically when the page is already usable.
       await this.loadAllItemsOfEvent(event)
+      // Load the creator of the event.
+      // Has to be awaited, otherwise the html displaying throws an error.
       await this.loadCreatorOfEvent(event)
+      // Load the participants of the event.
+      // Has to be awaited, otherwise the html displaying throws an error.
       await this.loadAllParticipantsOfEvent(event)
     },
+    /**
+     * Loads all the participants of an event.
+     * @param event Reference to the event to load the participants
+     */
     async loadAllParticipantsOfEvent(event) {
+      // Create new array in the referenced event
       event.Participants = []
       let groupID = event.Group.id
+      // Get the reference to the group from the database
       let groupRef = await this.$firestore.collection("Groups").doc(groupID).get();
       let group = groupRef.data();
+      // Push the data of all users of the group into the new array
       for (let userRefs of group.Users) {
         let userRef = await this.getUserRefByUserId(userRefs.id)
         let user = userRef.data()
         event.Participants.push(user)
       }
     },
-
+    /**
+     * Replaces the item references in an given event with actual data
+     * @param event Reference to the event
+     */
     async loadAllItemsOfEvent(event) {
+      // Create new variables in the event to load the items into
       event.LoadedItems = []
       event.ItemsFinished = ""
       let currentUser = this.$fb.auth().currentUser.uid
@@ -264,11 +304,17 @@ export default {
         }
       }
     },
-
+    /**
+     * Exchange the reference to the creator with the creator name to be displayed.
+     * @param event Reference to the event
+     */
     async loadCreatorOfEvent(event) {
+      // Check if a creator exists
       if (event.Creator) {
+        // Get the reference from the database
         let creatorRef = await this.getUserRefByUserId(event.Creator.id)
         let creator = creatorRef.data()
+        // Save the name and profilephoto of the creator or an empty string if no creator exists
         if (creator) {
           event.Creator = creator.fullName
           event.CreatorPhoto = creator.profilePhoto
@@ -278,11 +324,19 @@ export default {
         }
       }
     },
+    /**
+     * Loads an item from the database by the item id and returns a new item with the loaded data
+     * @param itemID The id of the item to be loaded
+     * @returns Promise of the item
+     */
     async getItemDataById(itemID) {
+      // Load the item reference from the database
       let newItem = await this.getItemByItemId(itemID)
       newItem.Id = itemID
+      // Load the creator of the item from the database
       let creatorRef = await this.getUserRefByUserId(newItem.Creator.id)
       newItem.Creator = creatorRef.data()
+      // Loads the shopper from the database if any exists
       let shopper
       try {
         let shopperRef = await this.getUserRefByUserId(newItem.Shopper.id)
@@ -293,12 +347,19 @@ export default {
       newItem.Shopper = shopper
       return newItem
     },
-
+    /**
+     * Loads and item from the database by item reference
+     * @param item The reference to the item
+     * @returns Promise of the item
+     */
     async getItemData(item) {
+      // Load the item from the database
       let newItem = await this.getItemByItemId(item.id)
       newItem.Id = item.id
+      // Load the creator from the database
       let creatorRef = await this.getUserRefByUserId(newItem.Creator.id)
       newItem.Creator = creatorRef.data()
+      // Loads the shopper from the database if any exists
       let shopper
       try {
         let shopperRef = await this.getUserRefByUserId(newItem.Shopper.id)
@@ -309,10 +370,17 @@ export default {
       newItem.Shopper = shopper
       return newItem
     },
+    /**
+     * Returns an item by its id
+     * @param itemId The id of the item
+     * @returns Promise of the item
+     */
     async getItemByItemId(itemId) {
+      // Load the item reference from the database
       let docRef = this.$firestore.collection("Items").doc(itemId);
       var returnValue
       await docRef.get().then(function (doc) {
+        // If the item exists load it to the local variable
         if (doc.exists) {
           returnValue = doc.data()
         }
@@ -321,21 +389,30 @@ export default {
       });
       return returnValue;
     },
+    /**
+     * Gets an user by its id
+     * @param userId The id of the user
+     * @returns Promise of the user
+     */
     async getUserRefByUserId(userId) {
+      // Loads the reference to the user from the database
       let docRef = this.$firestore.collection("users").doc(userId);
       var returnValue
       await docRef.get().then(function (doc) {
+        // If the user exists write the user to the local variable
         if (doc.exists) {
           returnValue = doc
         }
       }).catch(function (error) {});
       return returnValue;
     },
-
-    getEventsOfDay(day) {
-
-    },
-
+    /*
+    * getAgenda is checking all events that have the same date as the param
+    * all events that matches this date are stored into an array
+    *
+    * @param day
+    * @returns list of events on specific day
+    * */
     getAgenda(day) {
       let eventsOfDay = [];
       let dateOfDay = new Date(day.date)
@@ -356,9 +433,15 @@ export default {
       }
       return eventsOfDay;
     },
+    /*
+    * going forwards on the calendar timeline
+    * */
     calendarNext() {
       this.$refs.calendar.next()
     },
+    /*
+    * going backwards on the calendar timeline
+    * */
     calendarPrev() {
       this.$refs.calendar.prev()
     }
@@ -374,6 +457,7 @@ export default {
     }
   },
   async created() {
+    // starts the loading procedures for all data on start
     await this.getDataWithLoading();
   }
 }
